@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns="https://github.com/dwugofski/p2e_mons" 
+	targetNamespace="https://github.com/dwugofski/p2e_mons"
+	elementFormDefault="qualified">
+	<!--<xs:import namespace="https://www.w3.org/2001/XMLSchema" schemaLocation="virtual://server/schema.xsd"/>-->
+
+	<xs:simpleType name="lower">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="([^A-Z]+)"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="nameString">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="([a-z][a-z0-9_]+)"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="descText" mixed="true">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="b" type="xs:token" />
+			<xs:element name="i" type="xs:token" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:simpleType name="rarityLevel">
+		<xs:restriction base="lower">
+			<xs:enumeration value="common"/>
+			<xs:enumeration value="uncommon"/>
+			<xs:enumeration value="rare"/>
+			<xs:enumeration value="unique"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="alignmentString">
+		<xs:restriction base="lower">
+			<xs:enumeration value="lg"/>
+			<xs:enumeration value="ng"/>
+			<xs:enumeration value="cg"/>
+			<xs:enumeration value="ln"/>
+			<xs:enumeration value="n"/>
+			<xs:enumeration value="cn"/>
+			<xs:enumeration value="le"/>
+			<xs:enumeration value="ne"/>
+			<xs:enumeration value="ce"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="sizeString">
+		<xs:restriction base="lower">
+			<xs:enumeration value="tiny"/>
+			<xs:enumeration value="small"/>
+			<xs:enumeration value="medium"/>
+			<xs:enumeration value="large"/>
+			<xs:enumeration value="huge"/>
+			<xs:enumeration value="gargantuan"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="traitList">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="trait" type="lower"/>
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="namedQuantity">
+		<xs:all>
+			<xs:element name="name" type="xs:token"/>
+			<xs:element name="amount" type="xs:integer"/>
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="namedEntry">
+		<xs:all>
+			<xs:element name="name" type="xs:token"/>
+			<xs:element name="description" type="descText"/>
+		</xs:all>
+	</xs:complexType>
+
+	<!-- will need to test this -->
+	<xs:complexType name="baseModifier">
+		<xs:choice minOccurs="1" maxOccurs="2">
+			<xs:element name="base" minOccurs="1" maxOccurs="1" type="xs:integer"/>
+			<xs:element name="modifier" minOccurs="0" maxOccurs="1" type="xs:token"/>
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:simpleType name="actionCount">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="lower">
+					<xs:enumeration value="reaction"/>
+					<xs:enumeration value="passive"/>
+					<xs:enumeration value="free"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:positiveInteger"/>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<xs:complexType name="featSummary">
+		<xs:sequence>
+			<xs:element name="name" type="xs:token"/>
+			<xs:element name="count" type="actionCount"/>
+			<xs:element name="description" type="descText"/>
+			<xs:element name="traits" type="traitList" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="diceRoll">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="(([0-9]+d(2|3|4|6|8|10|12|20|100)((\+|\-)[0-9]+)*)|[0-9]+)"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="actionSummary">
+		<xs:all>
+			<xs:element name="type" type="lower"/>
+			<xs:element name="count" type="actionCount"/>
+			<xs:element name="name" type="xs:token"/>
+			<xs:element name="modifier" type="xs:integer"/>
+			<xs:element name="traits" type="traitList"/>
+			<xs:element name="results">
+				<xs:complexType>
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:element name="damage">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="dice" type="diceRoll"/>
+									<xs:element name="type" type="lower"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="effect" type="lower"/>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
+		</xs:all>
+	</xs:complexType>
+
+	<xs:simpleType name="spellTradition">
+		<xs:restriction base="lower">
+			<xs:enumeration value="arcane"/>
+			<xs:enumeration value="divine"/>
+			<xs:enumeration value="occult"/>
+			<xs:enumeration value="primal"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="spellcasterType">
+		<xs:restriction base="lower">
+			<xs:enumeration value="prepared"/>
+			<xs:enumeration value="spontaneous"/>
+			<xs:enumeration value="innate"/>
+			<xs:enumeration value="ritual"/>
+			<xs:enumeration value="focus"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="spellLevel">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="lower">
+					<xs:enumeration value="cantrip"/>
+					<xs:enumeration value="continuous"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:positiveInteger">
+					<xs:maxInclusive value="10"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
+	<xs:complexType name="spellSpec">
+		<xs:sequence>
+			<xs:element name="name" type="xs:token"/>
+			<xs:element name="slots" type="xs:positiveInteger" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="spellLevelGroup">
+		<xs:sequence>
+			<xs:element name="level" type="spellLevel" minOccurs="0"/>
+			<xs:element name="slots" type="xs:positiveInteger" minOccurs="0"/>
+			<xs:element name="spell" type="spellSpec" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="spellRepertoireSummary">
+		<xs:sequence>
+			<xs:element name="tradition" type="spellTradition"/>
+			<xs:element name="type" type="spellcasterType"/>
+			<xs:element name="difficulty" type="xs:positiveInteger"/>
+			<xs:element name="modifier" type="xs:integer" minOccurs="0"/>
+			<xs:element name="group" maxOccurs="unbounded" type="spellLevelGroup"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="root">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="p2emon" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="name" type="xs:token"/>
+							<xs:element name="level" type="xs:integer"/>
+							<xs:element name="rarity" type="rarityLevel"/>
+							<xs:element name="alignment" type="alignmentString"/>
+							<xs:element name="size" type="sizeString"/>
+							<xs:element name="type" type="lower"/>
+							<xs:element name="traits" type="traitList"/>
+							<xs:element name="perception" type="xs:integer"/>
+							<xs:element name="senses">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="sense" type="xs:token" />
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="languages">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="language" type="xs:token" />
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="skills">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="skill" type="namedQuantity"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="abilities">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="strength" type="xs:integer"/>
+										<xs:element name="dexterity" type="xs:integer"/>
+										<xs:element name="constitution" type="xs:integer"/>
+										<xs:element name="intelligence" type="xs:integer"/>
+										<xs:element name="wisdom" type="xs:integer"/>
+										<xs:element name="charisma" type="xs:integer"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="items">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="item" type="descText"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="interactions">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="interaction" type="namedEntry"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="armor" type="baseModifier"/>
+							<xs:element name="saves">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="fortitude" type="baseModifier"/>
+										<xs:element name="reflex" type="baseModifier"/>
+										<xs:element name="will" type="baseModifier"/>
+										<xs:element name="modifier" type="xs:token" minOccurs="0"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="hitpoints" type="baseModifier"/>
+							<xs:element name="immunities">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="immunity" type="lower"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="weaknesses">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="weakness" type="lower"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="resistances">
+								<xs:complexType>
+									<xs:choice minOccurs="0" maxOccurs="unbounded">
+										<xs:element name="resistance" type="lower"/>
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="offturn">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="feat" type="featSummary" minOccurs="0" maxOccurs="unbounded"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="speeds">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="speed" type="xs:positiveInteger"/>
+										<xs:element name="speedSpec" type="namedQuantity" minOccurs="0" maxOccurs="unbounded"/>
+									</xs:sequence>
+									<xs:attribute name="units" type="lower"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="actions">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="action" type="actionSummary" maxOccurs="unbounded"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="spells">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="spelllist" type="spellRepertoireSummary" minOccurs="0" maxOccurs="unbounded"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="onturn">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="feat" type="featSummary" minOccurs="0" maxOccurs="unbounded"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:all>
+						<xs:attribute name="name" type="nameString"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
