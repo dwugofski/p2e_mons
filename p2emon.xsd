@@ -24,6 +24,27 @@
 		</xs:choice>
 	</xs:complexType>
 
+	<xs:group name="quantityGroup">
+		<xs:sequence>
+			<xs:element name="base" type="xs:integer"/>
+			<xs:element name="modifier" minOccurs="0" type="lower"/>
+			<xs:element name="traits" minOccurs="0" type="traitList"/>
+		</xs:sequence>
+	</xs:group>
+
+	<xs:complexType name="quantityType">
+		<xs:group ref="quantityGroup"/>
+	</xs:complexType>
+
+	<xs:complexType name="namedQuantity">
+		<xs:sequence>
+			<xs:sequence>
+				<xs:element name="name" type="xs:token"/>
+			</xs:sequence>
+			<xs:group ref="quantityGroup"/>
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:simpleType name="rarityLevel">
 		<xs:restriction base="lower">
 			<xs:enumeration value="common"/>
@@ -64,13 +85,6 @@
 		</xs:choice>
 	</xs:complexType>
 
-	<xs:complexType name="namedQuantity">
-		<xs:all>
-			<xs:element name="name" type="xs:token"/>
-			<xs:element name="amount" type="xs:integer"/>
-		</xs:all>
-	</xs:complexType>
-
 	<xs:complexType name="namedEntry">
 		<xs:all>
 			<xs:element name="name" type="xs:token"/>
@@ -78,12 +92,19 @@
 		</xs:all>
 	</xs:complexType>
 
-	<!-- will need to test this -->
-	<xs:complexType name="baseModifier">
-		<xs:choice minOccurs="1" maxOccurs="2">
-			<xs:element name="base" minOccurs="1" maxOccurs="1" type="xs:integer"/>
-			<xs:element name="modifier" minOccurs="0" maxOccurs="1" type="xs:token"/>
-		</xs:choice>
+	<xs:complexType name="specialSpeeds">
+		<xs:sequence>
+			<xs:element name="name" type="lower"/>
+			<xs:group ref="quantityGroup"/>
+			<xs:element name="units" type="lower" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="baseSpeed">
+		<xs:sequence>
+			<xs:group ref="quantityGroup"/>
+			<xs:element name="units" type="lower" minOccurs="0"/>
+		</xs:sequence>
 	</xs:complexType>
 
 	<xs:simpleType name="actionCount">
@@ -105,7 +126,7 @@
 		<xs:sequence>
 			<xs:element name="name" type="xs:token"/>
 			<xs:element name="count" type="actionCount"/>
-			<xs:element name="description" type="descText"/>
+			<xs:element name="description" type="descText" minOccurs="0"/>
 			<xs:element name="traits" type="traitList" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -176,18 +197,39 @@
 		</xs:union>
 	</xs:simpleType>
 
+	<xs:simpleType name="spellSlotCount">
+		<xs:union>
+			<xs:simpleType>
+				<xs:restriction base="lower">
+					<xs:enumeration value="at will"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType>
+				<xs:restriction base="xs:positiveInteger"/>
+			</xs:simpleType>
+		</xs:union>
+	</xs:simpleType>
+
 	<xs:complexType name="spellSpec">
 		<xs:sequence>
 			<xs:element name="name" type="xs:token"/>
-			<xs:element name="slots" type="xs:positiveInteger" minOccurs="0"/>
+			<xs:element name="slots" type="spellSlotCount" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="spellLevelGroup">
 		<xs:sequence>
 			<xs:element name="level" type="spellLevel" minOccurs="0"/>
-			<xs:element name="slots" type="xs:positiveInteger" minOccurs="0"/>
-			<xs:element name="spell" type="spellSpec" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="height"minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:positiveInteger">
+						<xs:minInclusive value="1">
+						<xs:maxInclusive value="10">
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="slots" type="spellSlotCount" minOccurs="0"/>
+			<xs:element name="spell" type="spellSpec" minOccurs="1" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -196,7 +238,7 @@
 			<xs:element name="tradition" type="spellTradition"/>
 			<xs:element name="type" type="spellcasterType"/>
 			<xs:element name="difficulty" type="xs:positiveInteger"/>
-			<xs:element name="modifier" type="xs:integer" minOccurs="0"/>
+			<xs:element name="attack" type="quantityType" minOccurs="0"/>
 			<xs:element name="group" maxOccurs="unbounded" type="spellLevelGroup"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -239,12 +281,12 @@
 							<xs:element name="abilities">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="strength" type="xs:integer"/>
-										<xs:element name="dexterity" type="xs:integer"/>
-										<xs:element name="constitution" type="xs:integer"/>
-										<xs:element name="intelligence" type="xs:integer"/>
-										<xs:element name="wisdom" type="xs:integer"/>
-										<xs:element name="charisma" type="xs:integer"/>
+										<xs:element name="strength" type="quantityType"/>
+										<xs:element name="dexterity" type="quantityType"/>
+										<xs:element name="constitution" type="quantityType"/>
+										<xs:element name="intelligence" type="quantityType"/>
+										<xs:element name="wisdom" type="quantityType"/>
+										<xs:element name="charisma" type="quantityType"/>
 									</xs:sequence>
 								</xs:complexType>
 							</xs:element>
@@ -262,18 +304,18 @@
 									</xs:choice>
 								</xs:complexType>
 							</xs:element>
-							<xs:element name="armor" type="baseModifier"/>
+							<xs:element name="armor" type="quantityType"/>
 							<xs:element name="saves">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="fortitude" type="baseModifier"/>
-										<xs:element name="reflex" type="baseModifier"/>
-										<xs:element name="will" type="baseModifier"/>
+										<xs:element name="fortitude" type="quantityType"/>
+										<xs:element name="reflex" type="quantityType"/>
+										<xs:element name="will" type="quantityType"/>
 										<xs:element name="modifier" type="xs:token" minOccurs="0"/>
 									</xs:sequence>
 								</xs:complexType>
 							</xs:element>
-							<xs:element name="hitpoints" type="baseModifier"/>
+							<xs:element name="hitpoints" type="quantityType"/>
 							<xs:element name="immunities">
 								<xs:complexType>
 									<xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -284,14 +326,14 @@
 							<xs:element name="weaknesses">
 								<xs:complexType>
 									<xs:choice minOccurs="0" maxOccurs="unbounded">
-										<xs:element name="weakness" type="lower"/>
+										<xs:element name="weakness" type="namedQuantity"/>
 									</xs:choice>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="resistances">
 								<xs:complexType>
 									<xs:choice minOccurs="0" maxOccurs="unbounded">
-										<xs:element name="resistance" type="lower"/>
+										<xs:element name="resistance" type="namedQuantity"/>
 									</xs:choice>
 								</xs:complexType>
 							</xs:element>
@@ -305,8 +347,8 @@
 							<xs:element name="speeds">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="speed" type="xs:positiveInteger"/>
-										<xs:element name="speedSpec" type="namedQuantity" minOccurs="0" maxOccurs="unbounded"/>
+										<xs:element name="units" type="lower"/>
+										<xs:element name="speed" type="specialSpeeds" minOccurs="0" maxOccurs="unbounded"/>
 									</xs:sequence>
 									<xs:attribute name="units" type="lower"/>
 								</xs:complexType>

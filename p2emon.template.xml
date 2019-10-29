@@ -19,17 +19,27 @@
 		</languages>
 		<skills>
 			<skill>
-				<name>Skill Name</name>
-				<amount>10</amount>
+				<name>athletics</name>
+				<base>10</base>
+				<modifier>+20 when in forest</modifier>
+			</skill>
+			<skill>
+				<name>intimidation</name>
+				<base>10</base>
+			</skill>
+			<skill>
+				<name>stealth</name>
+				<base>17</base>
+				<modifier>+20 when in forest</modifier>
 			</skill>
 		</skills>
 		<abilities>
-			<strength>0</strength>
-			<dexterity>-2</dexterity>
-			<constitution>+8</constitution>
-			<intelligence>3</intelligence>
-			<wisdom>0</wisdom>
-			<charisma>1</charisma>
+          	<strength><base>0</base></strength>
+			<dexterity><base>-2</base></dexterity>
+			<constitution><base>+8</base></constitution>
+			<intelligence><base>3</base></intelligence>
+			<wisdom><base>0</base></wisdom>
+			<charisma><base>1</base></charisma>
 		</abilities>
 		<items>
 			<item>Any significant gear the creature carries is listed here.</item>
@@ -66,11 +76,21 @@
 			<immunity>deafened</immunity>
 		</immunities>
 		<weaknesses>
-			<weakness>fire</weakness>
-			<weakness>your smile</weakness>
+			<weakness>
+				<name>fire</name>
+				<base>10</base>
+			</weakness>
+			<weakness>
+				<name>mental</name>
+				<base>100</base>
+				<modifier>when you smile</modifier>
+			</weakness>
 		</weaknesses>
 		<resistances>
-			<resistance>cold</resistance>
+			<resistance>
+				<name>cold</name>
+				<base>5</base>
+			</resistance>
 		</resistances>
 		<offturn>
 			<feat>
@@ -86,12 +106,22 @@
                 <traits></traits>
 			</feat>
 		</offturn>
-		<speeds units="feet"> <!-- defaults to feet -->
-			<speed>30</speed>
-			<speedSpec>
+		<speeds> <!-- defaults to feet -->
+			<units>feet</units>
+			<speed>
+				<name>land</name>
+				<base>30</base>
+			</speed>
+			<speed>
 				<name>climb</name>
-				<amount>40</amount>
-			</speedSpec>
+				<base>40</base>
+				<modifier>when hulking</modifier>
+			</speed>
+			<speed>
+				<name>fly</name>
+				<base>720</base>
+				<units>inches</units>
+			</speed>
 		</speeds>
 		<actions>
 			<action>
@@ -136,7 +166,7 @@
 				<tradition>divine</tradition>
 				<type>spontaneous</type>
 				<difficulty>29</difficulty>
-				<modifier>21</modifier>
+				<attack><base>21</base></attack>
 				<group>
 					<level>2</level> <!-- 1-10, cantrip, continuous -->
 					<slots>4</slots>
