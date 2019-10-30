@@ -11,8 +11,8 @@
 		</xs:restriction>
 	</xs:simpleType>
 
-	<xs:simpleType name="nameString">
-		<xs:restriction base="xs:token">
+	<xs:simpleType name="idString">
+		<xs:restriction base="lower">
 			<xs:pattern value="([a-z][a-z0-9_]+)"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -256,14 +256,7 @@
 							<xs:element name="size" type="sizeString"/>
 							<xs:element name="type" type="lower"/>
 							<xs:element name="traits" type="traitList"/>
-							<xs:element name="perception" type="xs:integer"/>
-							<xs:element name="senses">
-								<xs:complexType>
-									<xs:choice minOccurs="0" maxOccurs="unbounded">
-										<xs:element name="sense" type="xs:token" />
-									</xs:choice>
-								</xs:complexType>
-							</xs:element>
+							<xs:element name="perception" type="quantityType"/>
 							<xs:element name="languages">
 								<xs:complexType>
 									<xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -299,9 +292,9 @@
 							</xs:element>
 							<xs:element name="interactions">
 								<xs:complexType>
-									<xs:choice minOccurs="0" maxOccurs="unbounded">
-										<xs:element name="interaction" type="namedEntry"/>
-									</xs:choice>
+									<xs:sequence>
+										<xs:element name="feat" type="featSummary" minOccurs="0" maxOccurs="unbounded"/>
+									</xs:sequence>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="armor" type="quantityType"/>
@@ -375,7 +368,7 @@
 								</xs:complexType>
 							</xs:element>
 						</xs:all>
-						<xs:attribute name="name" type="nameString"/>
+						<xs:attribute name="id" type="idString"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
