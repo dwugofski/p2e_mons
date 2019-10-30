@@ -7,8 +7,8 @@
 	============================================================================
 -->
 <!-- variables to keep track of uppercase and lowercase numbers -->
-<xsl:variable name="uppercase" value='ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞŸŽŠŒ'/>
-<xsl:variable name="lowercase" value='abcdefghijklmnopqrstuvwxyzàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿžšœ'/>
+<xsl:variable name="uppercase" select='ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞŸŽŠŒ'/>
+<xsl:variable name="lowercase" select='abcdefghijklmnopqrstuvwxyzàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿžšœ'/>
 
 <!-- Capitalize the starting letter of each word in a block of text, and all other letters lowercase -->
 <xsl:template name="camelcase">
@@ -96,7 +96,7 @@
 					<h3>Items </h3>
 					<xsl:apply-templates select="items/item"/>
 				</p>
-			</xsl:for-each>
+			</xsl:if>
 			<!-- Lastly, the type of the creature (e.g. undead) is listed here -->
 			<div class="trait type"><xsl:value-of select="./type"/></div>
 		</div>
@@ -214,7 +214,7 @@
 				The speed spec is displayed as follows:
 				Speed 40 ft; flying 120 ft; climb 30 ft; ...
 			-->
-			<xsl:if "count(./speeds/speed) != 0">
+			<xsl:if test="count(./speeds/speed) != 0">
 				<p>
 					<h3>Speed </h3>
 					<xsl:for-each select="./speeds/speed">
@@ -261,10 +261,10 @@
 							Effect: Special Effect plus Grab and Knockdown
 							Effect: Special Effect plus Grab, Knockdown, and Other Effect
 						-->
-						<xsl:if test="position() = 2"><xsl:text> plus </xsl:text>
+						<xsl:if test="position() = 2"><xsl:text> plus </xsl:text></xsl:if>
 						<xsl:if test="position() > 2 and count(../damage | ../effect) > 3">
 							<xsl:text>,</xsl:text>
-							<xsl:if test="position() != last()"><xsl:text> </xsl:text>
+							<xsl:if test="position() != last()"><xsl:text> </xsl:text></xsl:if>
 						</xsl:if>
 						<xsl:if test="position() = last() and count(../damage | ../effect) > 2"> and </xsl:if>
 						<xsl:if test="local-name() = 'damage'">
@@ -288,134 +288,20 @@
 	</div>
 </xsl:template>
 
-<xsl:template match="traits" mode="tag">
-	<xsl:for-each "./trait">
-		<div class="trait"><xsl:value-of "."></xsl:value-of>
-	</xsl:for-each>
-</xsl:template>
-
-<xsl:template match="*" mode="modifier_num">
-	<xsl:value-of select="format-number(., '+#,#')"/>
-</xsl:template>
-
-<xsl:template match="*" mode="quantity">
-	<xsl:apply-templates select="base" mode="modifier_num"/>
-	<xsl:if test="count(./modifier) &gt; 0">
-		<xsl:text> (</xsl:text><xsl:value-of select="./modifier"/><xsl:text>)</xsl:text>
-	</xsl:if>
-	<xsl:if test="count(./traits/trait) &gt; 0">
-		<xsl:text>, </xsl:text>
-		<xsl:apply-templates select="traits" mode="list_space"/>
-	</xsl:if>
-</xsl:template>
-
-<xsl:template match="*" mode="quantity_flat">
-	<xsl:value-of select="./base"/>
-	<xsl:if test="count(./modifier) &gt; 0">
-		<xsl:text> (</xsl:text><xsl:value-of select="./modifier"/><xsl:text>)</xsl:text>
-	</xsl:if>
-	<xsl:if test="count(./traits/trait) &gt; 0">
-		<xsl:text>, </xsl:text>
-		<xsl:apply-templates select="traits" mode="list_space"/>
-	</xsl:if>
-</xsl:template>
-
-<xsl:template match="*" mode="quantity_csv">
-	<xsl:apply-templates select="./base" mode="modifier_num"/>
-	<xsl:if test="count(./modifier) &gt; 0">
-		<xsl:text> (</xsl:text><xsl:value-of select="./modifier"/><xsl:text>)</xsl:text>
-	</xsl:if>
-	<xsl:if test="count(./traits/trait) &gt; 0">
-		<xsl:text>; </xsl:text>
-		<xsl:apply-templates select="traits" mode="list_csv"/>
-	</xsl:if>
-</xsl:template>
-
-<xsl:template match="*" mode="list_csv">
-	<xsl:for-each select="./*">
-		<xsl:if test="position() &gt; 1"><xsl:text>, </xsl:text></xsl:if>
-		<xsl:value-of select="."/>
-	</xsl:for-each>
-</xsl:template>
-
-<xsl:template match="*" mode="list_space">
-	<xsl:for-each select="./*">
-		<xsl:if test="position() &gt; 1"><xsl:text> </xsl:text></xsl:if>
-		<xsl:value-of select="."/>
-	</xsl:for-each>
-</xsl:template>
-
-<xsl:template match="*" mode="list_quantity">
-	<xsl:for-each select="./*">
-		<xsl:if test="position() &gt; 1"><xsl:text>, </xsl:text></xsl:if>
-		<xsl:if test="count(name) != 0">
-			<xsl:value-of select="name"/>
-		</xsl:if>
-		<xsl:apply-templates select="." mode="quantity"/>
-	</xsl:for-each>
-</xsl:template>
-
-<xsl:template match="*" mode="list_quantity_flat">
-	<xsl:for-each select="./*">
-		<xsl:if test="position() &gt; 1"><xsl:text>, </xsl:text></xsl:if>
-		<xsl:if test="count(name) != 0">
-			<xsl:value-of select="name"/>
-		</xsl:if>
-		<xsl:apply-templates select="." mode="quantity_flat"/>
-	</xsl:for-each>
-</xsl:template>
-
-<xsl:template match="count">
-	<xsl:choose>
-		<xsl:when test=". = 'free'"><div class="action_icon free"></div></xsl:when>
-		<xsl:when test=". = 'reaction'"><div class="action_icon reaction"></div></xsl:when>
-		<xsl:when test=". = 1"><div class="action_icon single"></div></xsl:when>
-		<xsl:when test=". = 2"><div class="action_icon double"></div></xsl:when>
-		<xsl:when test=". = 3"><div class="action_icon triple"></div></xsl:when>
-	</xsl:choose>
-</xsl:template>
-
-<xsl:template mode="enumeration">
-	<xsl:choose>
-		<xsl:when test="string(number(.)) = 'NaN'"><xsl:value-of select="."/></xsl:when>
-		<xsl:when test=". = 1"><xs:text>1st</xs:text></xsl:when>
-		<xsl:when test=". = 2"><xs:text>2nd</xs:text></xsl:when>
-		<xsl:when test=". = 3"><xs:text>3rd</xs:text></xsl:when>
-		<xsl:when test=". &gt;= 4"><xsl:value-of select="."/><xs:text>th</xs:text></xsl:when>
-	</xsl:choose>
-</xsl:template>
-
-<xsl:template match="feat">
-	<p>
-		<h3><xsl:value-of select="./name"/><xsl:text> </xsl:text></h3>
-		<xsl:apply-templates select="count"/>
-		<xsl:if test="count(./traits/trait) != 0">
-			<xsl:text>(</xsl:text><xsl:apply-templates select="traits" mode="list_csv"/><xsl:text>) </xsl:text>
-		</xsl:if>
-		<xsl:apply-templates select="./description"/>
-	</p>
-</xsl:template>
-
-<xsl:template match="description">
-	<span class="desc">
-		<xsl:copy-of select="node() | @*"/>
-	</span>
-</xsl:template>
-
-<xsl:template match="item">
-	<span class="desc">
-		<xsl:copy-of select="node() | @*"/>
-		<xsl:if test="position() != last()">
-			<xsl:text>, </xsl:text>
-		</xsl:if>
-	</span>
-</xsl:template>
-
-<xsl:template match="slots">
-	<xsl:text>(x</xsl:text><xsl:value-of select="."/><xsl:text>)</xsl:text>
-</xsl:template>
-
+<!-- 
+	============================================================================
+	 Spell Repertoires
+	============================================================================
+-->
 <xsl:template match="spell">
+	<!-- 
+		Each creature with spells has one or more lists of spells they can cast. Each list is a "repertoire" of spells. The repertoires are specified by tradtion (e.g. "arcane") and casting type (e.g. "spontaneous")
+		
+		The repertoire is displayed as follows:
+		<Tradition> <Castingtype> Spell[s] DC <DC>[, attack +<attack> [(<modifier text>)][; <trait1>, <trait2>, ...]]; <slotlevel1>th[ (<height>th)][ (<slot count> slot[s])] <spell1>, <spell2>, ...; <slotlevel2>th...
+
+		Where spell names are in italics
+	-->
 	<p>
 		<h3>
 			<xsl:choose>
@@ -435,19 +321,19 @@
 			<xsl:text> </xsl:text>
 			<xsl:choose>
 				<xsl:when test="count(.//spell) &gt; 1">
-					Spells
+					<xsl:text>Spells</xsl:text>
 				</xsl:when>
 				<xsl:otherwise>
-					Spell
+					<xsl:text>Spell</xsl:text>
 				</xsl:otherwise>
 			</xsl:choose>
 		</h3>
-		<xsl:text>DC </xsl:text><xsl:value-of select="./difficulty"/>
+		<xsl:text>DC</xsl:text><xsl:value-of select="./difficulty"/>
 		<xsl:if test="count(./modifier) != 0">
 			<xsl:text>, attack </xsl:text><xsl:apply-templates select="modifier" mode="quantity"/>
 		</xsl:if>
 		<xsl:text>; </xsl:text>
-		<xsl:for-each "./group">
+		<xsl:for-each select="./group">
 			<h3>
 				<xsl:apply-templates select="level" mode="enumeration"/>
 				<xsl:if test="count(./height) != 0">
@@ -457,17 +343,217 @@
 				</xsl:if>
 			</h3>
 			<xsl:if test="count(./slots) != 0">
-				<xsl:apply-templates select="slots"/>
-				<xsl:text> </xsl:text>
+				<xsl:choose>
+					<xsl:when test="./slots = 1"><xsl:text>(1 slot)</xsl:text></xsl:when>
+					<xsl:otherwise>(<xsl:value-of select="./slots"/> slots)</xsl:otherwise>
+				</xsl:choose>
 			</xsl:if>
+			<xsl:text> </xsl:text>
 			<xsl:for-each select="./spell">
 				<xsl:if test="position() != 1"><xsl:text> </xsl:text></xsl:if>
 				<i><xsl:value-of select="./name"/></i>
-				<xsl:if test="count(./slots) != 0"><xsl:text> </xsl:text><xsl:apply-templates select="slots"/></xsl:if>
+				<xsl:if test="count(./slots) != 0">
+					<xsl:text> </xsl:text>
+					<xsl:text>(x</xsl:text><xsl:value-of select="."/><xsl:text>)</xsl:text>
+				</xsl:if>
 			</xsl:for-each>
 			<xsl:if test="position() != last()"><xsl:text>; </xsl:text></xsl:if>
 		</xsl:for-each>
 	</p>
+</xsl:template>
+
+<!--
+	Present the modifier "th" suffix following a number (e.g. for spell levels)
+
+	Form:
+	<number><"st" | "nd" | "rd" | "th">
+-->
+<xsl:template mode="enumeration">
+	<xsl:choose>
+		<xsl:when test="string(number(.)) = 'NaN'"><xsl:value-of select="."/></xsl:when>
+		<xsl:when test=". = 1"><xsl:text>1st</xsl:text></xsl:when>
+		<xsl:when test=". = 2"><xsl:text>2nd</xsl:text></xsl:when>
+		<xsl:when test=". = 3"><xsl:text>3rd</xsl:text></xsl:when>
+		<xsl:when test=". &gt;= 4"><xsl:value-of select="."/><xsl:text>th</xsl:text></xsl:when>
+	</xsl:choose>
+</xsl:template>
+
+<!-- 
+	============================================================================
+	 Lists
+	============================================================================
+-->
+
+<!--
+	List values, separated by commas
+-->
+<xsl:template match="*" mode="list_csv">
+	<xsl:for-each select="./*">
+		<xsl:if test="position() &gt; 1"><xsl:text>, </xsl:text></xsl:if>
+		<xsl:value-of select="."/>
+	</xsl:for-each>
+</xsl:template>
+
+<!--
+	List values, separated by spaces
+-->
+<xsl:template match="*" mode="list_space">
+	<xsl:for-each select="./*">
+		<xsl:if test="position() &gt; 1"><xsl:text> </xsl:text></xsl:if>
+		<xsl:value-of select="."/>
+	</xsl:for-each>
+</xsl:template>
+
+<!--
+	List quantities, separated by commas
+
+	Will be of the form:
+	[<quanity1 name> ]<+ or -><abs(quantity1)>[ (<quantity1 modifier>)][ q1t1, q1t2, ...], [<quantity2 name>]<+ or -><abs(quantity2)>...
+-->
+<xsl:template match="*" mode="list_quantity">
+	<xsl:for-each select="./*">
+		<xsl:if test="position() &gt; 1"><xsl:text>, </xsl:text></xsl:if>
+		<xsl:if test="count(name) != 0">
+			<xsl:value-of select="./name"/>
+			<xsl:text> </xsl:text>
+		</xsl:if>
+		<xsl:apply-templates mode="quantity"/>
+	</xsl:for-each>
+</xsl:template>
+
+<!--
+	List quantities, separated by commas, but do not prefix positive values with "+"
+
+	Will be of the form:
+	[<quanity1 name> ]<quantity1>[ (<quantity1 modifier>)][ q1t1, q1t2, ...], [<quantity2 name>][-]<quantity2>...
+-->
+<xsl:template match="*" mode="list_quantity_flat">
+	<xsl:for-each select="./*">
+		<xsl:if test="position() &gt; 1"><xsl:text>, </xsl:text></xsl:if>
+		<xsl:if test="count(name) != 0">
+			<xsl:value-of select="./name"/>
+			<xsl:text> </xsl:text>
+		</xsl:if>
+		<xsl:apply-templates mode="quantity_flat"/>
+	</xsl:for-each>
+</xsl:template>
+
+<!--
+	Present a numeric quantity
+
+	The quantity will be of the form
+	<+ or -><abs(quantity)>[ (<quantity modifier>)][ trait1, trait2, ...]
+-->
+<xsl:template match="*" mode="quantity">
+	<xsl:apply-templates select="base" mode="modifier_num"/>
+	<xsl:if test="count(./modifier) &gt; 0">
+		<xsl:text> (</xsl:text><xsl:value-of select="./modifier"/><xsl:text>)</xsl:text>
+	</xsl:if>
+	<xsl:if test="count(./traits/trait) &gt; 0">
+		<xsl:text>, </xsl:text>
+		<xsl:apply-templates select="traits" mode="list_space"/>
+	</xsl:if>
+</xsl:template>
+
+<!--
+	Present a numeric quantity without the + sign for a positive quantity
+
+	The quantity will be of the form
+	<quantity>[ (<quantity modifier>)][ trait1, trait2, ...]
+-->
+<xsl:template match="*" mode="quantity_flat">
+	<xsl:value-of select="./base"/>
+	<xsl:if test="count(./modifier) &gt; 0">
+		<xsl:text> (</xsl:text><xsl:value-of select="./modifier"/><xsl:text>)</xsl:text>
+	</xsl:if>
+	<xsl:if test="count(./traits/trait) &gt; 0">
+		<xsl:text>, </xsl:text>
+		<xsl:apply-templates select="traits" mode="list_space"/>
+	</xsl:if>
+</xsl:template>
+
+<!--
+	Present a numeric quantity without the + sign for a positive quantity
+
+	The quantity will be of the form
+	[-]<quantity>[ (<quantity modifier>)][ trait1, trait2, ...]
+-->
+<xsl:template match="*" mode="quantity_csv">
+	<xsl:apply-templates select="./base" mode="modifier_num"/>
+	<xsl:if test="count(./modifier) &gt; 0">
+		<xsl:text> (</xsl:text><xsl:value-of select="./modifier"/><xsl:text>)</xsl:text>
+	</xsl:if>
+	<xsl:if test="count(./traits/trait) &gt; 0">
+		<xsl:text>; </xsl:text>
+		<xsl:apply-templates select="traits" mode="list_csv"/>
+	</xsl:if>
+</xsl:template>
+
+<!--
+	Present a number, but placing a + sign in front of a positive number and a - sign in front of a negative one
+
+	Form:
+	<value's sign><abs(value)>
+-->
+<xsl:template match="*" mode="modifier_num">
+	<xsl:value-of select="format-number(., '+#,#')"/>
+</xsl:template>
+
+<!--
+	Present a list of traits in tag form
+-->
+<xsl:template match="traits" mode="tag">
+	<xsl:for-each select="./trait">
+		<div class="trait"><xsl:value-of select="."></xsl:value-of></div>
+	</xsl:for-each>
+</xsl:template>
+
+<!-- 
+	Produce the icon representing the number of actions an action/activity/reaction takes
+-->
+<xsl:template match="count">
+	<xsl:choose>
+		<xsl:when test=". = 'free'"><div class="action_icon free"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 'reaction'"><div class="action_icon reaction"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 1"><div class="action_icon single"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 2"><div class="action_icon double"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 3"><div class="action_icon triple"></div><xsl:text> </xsl:text></xsl:when>
+	</xsl:choose>
+</xsl:template>
+
+<!-- 
+	Present a feat
+
+	Form:
+	<feat name> [<action icon> ][(<trait1>, <trait2>, ...) ]<description>
+-->
+<xsl:template match="feat">
+	<p>
+		<h3><xsl:value-of select="./name"/><xsl:text> </xsl:text></h3>
+		<xsl:apply-templates select="count"/>
+		<xsl:if test="count(./traits/trait) != 0">
+			<xsl:text>(</xsl:text><xsl:apply-templates select="traits" mode="list_csv"/><xsl:text>) </xsl:text>
+		</xsl:if>
+		<xsl:apply-templates select="./description"/>
+	</p>
+</xsl:template>
+
+<!--
+	Present a complex (html-formatted) description block
+-->
+<xsl:template match="description">
+	<span class="desc">
+		<xsl:copy-of select="node() | @*"/>
+	</span>
+</xsl:template>
+
+<xsl:template match="item">
+	<span class="desc">
+		<xsl:copy-of select="node() | @*"/>
+		<xsl:if test="position() != last()">
+			<xsl:text>, </xsl:text>
+		</xsl:if>
+	</span>
 </xsl:template>
 
 

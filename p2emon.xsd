@@ -21,6 +21,14 @@
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="b" type="xs:token" />
 			<xs:element name="i" type="xs:token" />
+			<xs:element name="ul">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="li" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="path" type="namedEntry"/>
 		</xs:choice>
 	</xs:complexType>
 
@@ -220,11 +228,11 @@
 	<xs:complexType name="spellLevelGroup">
 		<xs:sequence>
 			<xs:element name="level" type="spellLevel" minOccurs="0"/>
-			<xs:element name="height"minOccurs="0">
+			<xs:element name="height" minOccurs="0">
 				<xs:simpleType>
 					<xs:restriction base="xs:positiveInteger">
-						<xs:minInclusive value="1">
-						<xs:maxInclusive value="10">
+						<xs:minInclusive value="1"/>
+						<xs:maxInclusive value="10"/>
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
