@@ -438,6 +438,12 @@
 	</xsl:for-each>
 </xsl:template>
 
+<!-- 
+	============================================================================
+	 Quantities
+	============================================================================
+-->
+
 <!--
 	Present a numeric quantity
 
@@ -499,28 +505,11 @@
 	<xsl:value-of select="format-number(., '+#,#')"/>
 </xsl:template>
 
-<!--
-	Present a list of traits in tag form
--->
-<xsl:template match="traits" mode="tag">
-	<xsl:for-each select="./trait">
-		<div class="trait"><xsl:value-of select="."></xsl:value-of></div>
-	</xsl:for-each>
-</xsl:template>
-
 <!-- 
-	Produce the icon representing the number of actions an action/activity/reaction takes
+	============================================================================
+	 Feats and Descriptions
+	============================================================================
 -->
-<xsl:template match="count">
-	<xsl:choose>
-		<xsl:when test=". = 'free'"><div class="action_icon free"></div><xsl:text> </xsl:text></xsl:when>
-		<xsl:when test=". = 'reaction'"><div class="action_icon reaction"></div><xsl:text> </xsl:text></xsl:when>
-		<xsl:when test=". = 1"><div class="action_icon single"></div><xsl:text> </xsl:text></xsl:when>
-		<xsl:when test=". = 2"><div class="action_icon double"></div><xsl:text> </xsl:text></xsl:when>
-		<xsl:when test=". = 3"><div class="action_icon triple"></div><xsl:text> </xsl:text></xsl:when>
-	</xsl:choose>
-</xsl:template>
-
 <!-- 
 	Present a feat
 
@@ -538,15 +527,66 @@
 	</p>
 </xsl:template>
 
+<!-- 
+	Produce the icon representing the number of actions an action/activity/reaction takes
+-->
+<xsl:template match="count">
+	<xsl:choose>
+		<xsl:when test=". = 'free'"><div class="action_icon free"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 'reaction'"><div class="action_icon reaction"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 1"><div class="action_icon single"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 2"><div class="action_icon double"></div><xsl:text> </xsl:text></xsl:when>
+		<xsl:when test=". = 3"><div class="action_icon triple"></div><xsl:text> </xsl:text></xsl:when>
+	</xsl:choose>
+</xsl:template>
+
+<!--
+	Present a list of traits in tag form
+-->
+<xsl:template match="traits" mode="tag">
+	<xsl:for-each select="./trait">
+		<div class="trait"><xsl:value-of select="."></xsl:value-of></div>
+	</xsl:for-each>
+</xsl:template>
+
 <!--
 	Present a complex (html-formatted) description block
 -->
 <xsl:template match="description">
-	<span class="desc">
-		<xsl:copy-of select="node() | @*"/>
-	</span>
+	<xsl:for-each select="*">
+		<xsl:choose>
+			<xsl:when test="local-name() = 'entry'">
+				<p>
+					<h3><xsl:value-of select="./name"/></h3>
+					<xsl:apply-templates select="description"/>
+				</p>
+			</xsl:when>
+			<xsl:when test="text()">
+				<span class="desc"><xsl:value-of select="."/></span>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:attribute name="class">desc</xsl:attribute>
+					<xsl:apply-templates/>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:for-each>
 </xsl:template>
 
+<!-- 
+	Handle the "entry" type of sub-description
+-->
+<xsl:template match="entry">
+	<p>
+		<h3><xsl:value-of select="./name"/></h3>
+		<xsl:apply-templates select="description"/>
+	</p>
+</xsl:template>
+
+<!--
+	Handle an "item" object, which can be italicized
+-->
 <xsl:template match="item">
 	<span class="desc">
 		<xsl:copy-of select="node() | @*"/>

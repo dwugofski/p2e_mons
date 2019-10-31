@@ -3,47 +3,162 @@
 	xmlns="https://github.com/dwugofski/p2e_mons" 
 	targetNamespace="https://github.com/dwugofski/p2e_mons"
 	elementFormDefault="qualified">
-	<!--<xs:import namespace="https://www.w3.org/2001/XMLSchema" schemaLocation="virtual://server/schema.xsd"/>-->
 
+	<!--
+		Lowercase text is used, particularly with traits, when a text item may be processed behind the scenes
+
+		This simple type is simply a lowercase-only token
+	-->
 	<xs:simpleType name="lower">
 		<xs:restriction base="xs:token">
 			<xs:pattern value="([^A-Z]+)"/>
 		</xs:restriction>
 	</xs:simpleType>
 
+	<!--
+		The idString type is used to format xml-relevant ids
+
+		This simple type is lowercase, must not start with a number, and may only contain letters, numbers, and underscores
+	-->
 	<xs:simpleType name="idString">
 		<xs:restriction base="lower">
-			<xs:pattern value="([a-z][a-z0-9_]+)"/>
+			<xs:pattern value="([a-z_][a-z0-9_]+)"/>
 		</xs:restriction>
 	</xs:simpleType>
 
-	<xs:complexType name="descText" mixed="true">
+	<!--
+		A text modifier is used to change the way text is displayed.
+
+		This mixed complex type can contain
+			[b]+ - textModifier
+			[i]+ - textModifier
+			[ul]+
+				1. [li]+ - textModifier
+			[ol]+
+				1. [li]+ - textModifier
+	-->
+	<xs:complexType name="textModifier" mixed="true">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="b" type="xs:token" />
-			<xs:element name="i" type="xs:token" />
+			<xs:element name="b" type="textModifier" />
+			<xs:element name="i" type="textModifier" />
 			<xs:element name="ul">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="li" maxOccurs="unbounded"/>
+						<xs:element name="li" type="textModifier" maxOccurs="unbounded"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="path" type="namedEntry"/>
+			<xs:element name="ol">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="li" type="textModifier" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 		</xs:choice>
 	</xs:complexType>
 
+	<!--
+		The descText type is used complex descriptions (e.g. for feats). These descriptions can contain named entries for roll results.
+
+		This mixed complex type can contain
+			[b]+ - textModifier
+			[i]+ - textModifier
+			[ul]+
+				1. [li]+ - textModifier
+			[ol]+
+				1. [li]+ - textModifier
+			[entry]+
+				1. name - token
+				2. description - descText
+	-->
+	<xs:complexType name="descText" mixed="true">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="b" type="textModifier" />
+			<xs:element name="i" type="textModifier" />
+			<xs:element name="ul">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="li" type="textModifier" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ol">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="li" type="textModifier" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="entry">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="name" type="xs:token"/>
+						<xs:element name="description" type="descText"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+
+	<!-- 
+		The itemText type is used to express an item. It can contain italicized or unmodified text. Each item has its own element
+
+		This mixed complex type can contain
+			[i]+ - token
+	-->
+	<xs:complexType name="itemText" mixed="true">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="i" type="xs:token" />
+		</xs:choice>
+	</xs:complexType>
+
+	<!--
+		The traitList type is used to collect traits describing something
+
+		This complex type can contain
+			[trait]+ - lower
+	-->
+	<xs:complexType name="traitList">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="trait" type="lower"/>
+		</xs:choice>
+	</xs:complexType>
+
+	<!-- 
+		The quantityGroup group encapsulates the requirements to specify a quantity
+
+		This group includes
+			base - integer
+			[modifier] - token
+			[traits] - traitList
+	-->
 	<xs:group name="quantityGroup">
 		<xs:sequence>
 			<xs:element name="base" type="xs:integer"/>
-			<xs:element name="modifier" minOccurs="0" type="lower"/>
+			<xs:element name="modifier" minOccurs="0" type="xs:token"/>
 			<xs:element name="traits" minOccurs="0" type="traitList"/>
 		</xs:sequence>
 	</xs:group>
 
+	<!--
+		The quantityType type specifies a quantity and is a type extension to the quantityGroup
+
+		This complex type contains
+			~quantityGroup~
+	-->
 	<xs:complexType name="quantityType">
 		<xs:group ref="quantityGroup"/>
 	</xs:complexType>
 
+	<!--
+		The namedQuantity type specifies a quantity under a given name
+
+		This complex type contains
+			1.
+				1. name - token
+			2. ~quantityGroup~
+	-->
 	<xs:complexType name="namedQuantity">
 		<xs:sequence>
 			<xs:sequence>
@@ -53,15 +168,29 @@
 		</xs:sequence>
 	</xs:complexType>
 
+
+	<!--
+		The rarityLevel type is used to specify a thing's rarity
+
+		This simple type is an extension of the lower type and contains the following options
+			common | uncommon | rare | legendary | unique
+	-->
 	<xs:simpleType name="rarityLevel">
 		<xs:restriction base="lower">
 			<xs:enumeration value="common"/>
 			<xs:enumeration value="uncommon"/>
 			<xs:enumeration value="rare"/>
+			<xs:enumeration value="legendary"/>
 			<xs:enumeration value="unique"/>
 		</xs:restriction>
 	</xs:simpleType>
 
+	<!--
+		The alignmentString type is used to specify a creature's alignment
+
+		This simple type is an extension of the lower type and contains the following options
+			{<l|n|c><g|n|e>} - {nn} + {n}
+	-->
 	<xs:simpleType name="alignmentString">
 		<xs:restriction base="lower">
 			<xs:enumeration value="lg"/>
@@ -76,6 +205,12 @@
 		</xs:restriction>
 	</xs:simpleType>
 
+	<!--
+		The sizeString type is used to specify a creature's size
+
+		This simple type is an extension of the lower type and contains the following options
+			tiny | small | medium | large | huge | gargantuan
+	-->
 	<xs:simpleType name="sizeString">
 		<xs:restriction base="lower">
 			<xs:enumeration value="tiny"/>
@@ -87,12 +222,13 @@
 		</xs:restriction>
 	</xs:simpleType>
 
-	<xs:complexType name="traitList">
-		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="trait" type="lower"/>
-		</xs:choice>
-	</xs:complexType>
+	<!--
+		The namedEntry type is used to specify a thing with a name and a description (e.g. an interaction ability)
 
+		This complex type contains
+			name - token
+			description - descText
+	-->
 	<xs:complexType name="namedEntry">
 		<xs:all>
 			<xs:element name="name" type="xs:token"/>
@@ -100,6 +236,14 @@
 		</xs:all>
 	</xs:complexType>
 
+	<!--
+		The specialSpeeds type is used to specify a speed of a creature
+
+		This complexType contains
+			1. name - lower
+			2. ~quantityGroup~
+			3. [units] - lower
+	-->
 	<xs:complexType name="specialSpeeds">
 		<xs:sequence>
 			<xs:element name="name" type="lower"/>
@@ -108,13 +252,12 @@
 		</xs:sequence>
 	</xs:complexType>
 
-	<xs:complexType name="baseSpeed">
-		<xs:sequence>
-			<xs:group ref="quantityGroup"/>
-			<xs:element name="units" type="lower" minOccurs="0"/>
-		</xs:sequence>
-	</xs:complexType>
+	<!--
+		The actionCount type is used to specify the number of actions a feat or action takes
 
+		This simpleType is a union of a lower type and a positive integer which can take the values
+			free | passive | reaction | 1-3
+	-->
 	<xs:simpleType name="actionCount">
 		<xs:union>
 			<xs:simpleType>
@@ -125,11 +268,22 @@
 				</xs:restriction>
 			</xs:simpleType>
 			<xs:simpleType>
-				<xs:restriction base="xs:positiveInteger"/>
+				<xs:restriction base="xs:positiveInteger">
+					<xs:maxInclusive value="3"/>
+				</xs:restriction>
 			</xs:simpleType>
 		</xs:union>
 	</xs:simpleType>
 
+	<!--
+		The featSummary type is used to summarize a feat
+		
+		This complex type can contain
+			1. name - token
+			2. count - actionCount
+			3. [description] - descText
+			4. [traits] - traitList
+	-->
 	<xs:complexType name="featSummary">
 		<xs:sequence>
 			<xs:element name="name" type="xs:token"/>
@@ -139,22 +293,44 @@
 		</xs:sequence>
 	</xs:complexType>
 
+	<!--
+		A diceRoll element is used to display the result of a dice roll
+
+		This simple type can take the form
+			<number of dice>d<2|3|4|6|8|12|20|100>[<+|-><modifier>] | <flat value>
+	-->
 	<xs:simpleType name="diceRoll">
 		<xs:restriction base="xs:token">
-			<xs:pattern value="(([0-9]+d(2|3|4|6|8|10|12|20|100)((\+|\-)[0-9]+)*)|[0-9]+)"/>
+			<xs:pattern value="(([0-9]+d(2|3|4|6|8|10|12|20|100)((\+|\-)[0-9]+)?)|[0-9]+)"/>
 		</xs:restriction>
 	</xs:simpleType>
 
+	<!--
+		An actionSummary is the summary description of an action. Actions may result in damage and/or an effect
+
+		This complexType takes the form
+			1. type - lower
+			2. count - actionCount
+			3. name - token
+			4. modifier - integer
+			5. [traits] - traitList
+			6. results
+				(at least one of these)
+				[damage]+
+					1. dice - diceRoll
+					2. type - lower
+				[effect]+ - lower
+	-->
 	<xs:complexType name="actionSummary">
-		<xs:all>
+		<xs:sequence>
 			<xs:element name="type" type="lower"/>
 			<xs:element name="count" type="actionCount"/>
 			<xs:element name="name" type="xs:token"/>
 			<xs:element name="modifier" type="xs:integer"/>
-			<xs:element name="traits" type="traitList"/>
+			<xs:element name="traits" type="traitList" minOccurs="0"/>
 			<xs:element name="results">
 				<xs:complexType>
-					<xs:choice minOccurs="0" maxOccurs="unbounded">
+					<xs:choice minOccurs="1" maxOccurs="unbounded">
 						<xs:element name="damage">
 							<xs:complexType>
 								<xs:sequence>
@@ -167,7 +343,7 @@
 					</xs:choice>
 				</xs:complexType>
 			</xs:element>
-		</xs:all>
+		</xs:sequence>
 	</xs:complexType>
 
 	<xs:simpleType name="spellTradition">
@@ -294,7 +470,7 @@
 							<xs:element name="items">
 								<xs:complexType>
 									<xs:choice minOccurs="0" maxOccurs="unbounded">
-										<xs:element name="item" type="descText"/>
+										<xs:element name="item" type="itemText"/>
 									</xs:choice>
 								</xs:complexType>
 							</xs:element>
