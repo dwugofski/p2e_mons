@@ -33,15 +33,17 @@ using namespace ultralight;
 
 int main() {
 
-	file_system = framework::CreatePlatformFileSystem("E:\\David\\Personal Documents\\git\\p2e_mons\\res\\p2em_ui\\");
-	auto& platform = Platform::instance();
-	platform.set_file_system(file_system);
-	file_system = Platform::instance().file_system();
-
 	///
 	/// Create our main App instance.
 	///
 	auto app = App::Create();
+
+	file_system = framework::CreatePlatformFileSystem("E:\\David\\Personal Documents\\git\\p2e_mons\\res\\p2em_ui\\");
+	auto& platform = Platform::instance();
+	platform.set_file_system(file_system);
+	file_system = Platform::instance().file_system();
+	ultralight::String16 path("html\\main.html");
+	bool doesexist = file_system->FileExists(path);
 
 	///
 	/// Create our Window using default window flags.
