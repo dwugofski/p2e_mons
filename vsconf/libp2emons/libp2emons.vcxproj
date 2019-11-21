@@ -130,9 +130,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\p2em_core.h" />
-    <ClInclude Include="..\..\inc\p2e_core.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\p2em_core.cpp" />
     <ClCompile Include="..\..\src\p2em_monster.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
