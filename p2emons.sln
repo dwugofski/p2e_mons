@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libp2emons", "vsconf\libp2emons\libp2emons.vcxproj", "{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}"
 EndProject
@@ -19,16 +19,16 @@ Global
 		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Debug|x64.Build.0 = Debug|x64
 		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Debug|x86.ActiveCfg = Debug|Win32
 		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Debug|x86.Build.0 = Debug|Win32
-		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Release|x64.ActiveCfg = Release|x64
-		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Release|x64.Build.0 = Release|x64
+		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Release|x64.ActiveCfg = Debug|x64
+		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Release|x64.Build.0 = Debug|x64
 		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Release|x86.ActiveCfg = Release|Win32
 		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}.Release|x86.Build.0 = Release|Win32
 		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Debug|x64.ActiveCfg = Debug|x64
 		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Debug|x64.Build.0 = Debug|x64
 		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Debug|x86.ActiveCfg = Debug|Win32
 		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Debug|x86.Build.0 = Debug|Win32
-		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Release|x64.ActiveCfg = Release|x64
-		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Release|x64.Build.0 = Release|x64
+		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Release|x64.ActiveCfg = Debug|x64
+		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Release|x64.Build.0 = Debug|x64
 		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Release|x86.ActiveCfg = Release|Win32
 		{8E14B036-2404-42EF-AF8D-4E63747604FF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
