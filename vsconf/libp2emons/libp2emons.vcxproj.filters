@@ -18,12 +18,12 @@
     <ClInclude Include="..\..\inc\p2em_core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\p2e_core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\p2em_monster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_core.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
