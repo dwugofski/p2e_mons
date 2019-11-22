@@ -23,10 +23,12 @@ Monster::Monster(Core* core) {
 	uint id = 0;
 	bool found = true;
 
+	srand(time(0));
+
 	// Try to find an unused ID
 	while (found) {
-		if (trycount++ >= ID_CREATE_TRYCOUNT_LIMIT) throw P2EMonException(P2EMON_ERR_ID_CREATION_TIMEOUT);
-		id = std::rand();
+		if (trycount++ >= ID_CREATE_TRYCOUNT_LIMIT) throw Exception(P2EMON_ERR_ID_CREATION_TIMEOUT);
+		id = rand();
 		found = core->has(id);
 	}
 
@@ -54,11 +56,11 @@ void Monster::id(uint id) {
 	std::pair<uint, Monster*> myval;
 
 	// If we find a monster with that ID already, do not create it
-	if (_core->has(id)) throw P2EMonException(P2EMON_ERR_DUPLICATE_MONSTER);
+	if (_core->has(id)) throw Exception(P2EMON_ERR_DUPLICATE_MONSTER);
 
 	// Make sure the current monster exists
-	if (!_core->has(_id)) throw P2EMonException(P2EMON_ERR_MONSTER_NOT_FOUND);
-	if (_core->get(_id) != this) throw P2EMonException(P2EMON_ERR_MONSTER_MISMATCH);
+	if (!_core->has(_id)) throw Exception(P2EMON_ERR_MONSTER_NOT_FOUND);
+	if (_core->get(_id) != this) throw Exception(P2EMON_ERR_MONSTER_MISMATCH);
 
 	// Remove the current monster + id pair from the record
 	_core->remove(this);
@@ -75,7 +77,7 @@ string Monster::name() const {
 }
 
 void Monster::name(const string& newname) {
-	if (newname == P2EMON_NULL_NAME_STRING) throw P2EMonException(P2EMON_ERR_INVALID_NAME);
+	if (newname == P2EMON_NULL_NAME_STRING) throw Exception(P2EMON_ERR_INVALID_NAME);
 
 	_name = newname;
 }
