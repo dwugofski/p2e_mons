@@ -3,15 +3,15 @@
 
 using namespace p2em_core;
 
-P2EMonException::P2EMonException(P2EMonExceptionCode excode, const string& msg) {
+Exception::Exception(ExceptionCode excode, const string& msg) {
 	_code = excode;
 	_msg = msg;
 }
 
-P2EMonException::P2EMonException(P2EMonExceptionCode excode) : P2EMonException::P2EMonException(excode, P2EMonExceptionStrings[excode]) {} ;
+Exception::Exception(ExceptionCode excode) : Exception::Exception(excode, P2EMonExceptionStrings[excode]) {} ;
 
-P2EMonExceptionCode P2EMonException::code() const { return _code; }
-string P2EMonException::msg() const { return _msg; }
+ExceptionCode Exception::code() const { return _code; }
+string Exception::msg() const { return _msg; }
 
 Core::Core() {
 	umap<uint, Monster*> _monsters = { {P2EMON_NULL_ID, nullptr} };
@@ -26,7 +26,7 @@ bool Core::has(const Monster* mon) const {
 }
 
 Monster* Core::get(uint id) {
-	if (!has(id)) throw P2EMonException(P2EMON_ERR_MONSTER_NOT_FOUND);
+	if (!has(id)) throw Exception(P2EMON_ERR_MONSTER_NOT_FOUND);
 	return _monsters[id];
 }
 
@@ -43,7 +43,7 @@ void Core::add(Monster* mon) {
 	if (has(mon->id())) {
 		// If the monster is already in the record, do nothing; otherwise raise an exception
 		if (_monsters[mon->id()] == mon) return;
-		else throw P2EMonException(P2EMON_ERR_DUPLICATE_MONSTER);
+		else throw Exception(P2EMON_ERR_DUPLICATE_MONSTER);
 	}
 	else {
 		// Add the new monster
@@ -51,7 +51,7 @@ void Core::add(Monster* mon) {
 	}
 
 	// Should not reach this
-	throw P2EMonException(P2EMON_ERR);
+	throw Exception(P2EMON_ERR);
 }
 
 void Core::remove(Monster* mon) {
@@ -59,7 +59,7 @@ void Core::remove(Monster* mon) {
 	if (has(mon->id())) {
 		// If the monster matches the record, remove it; otherwise raise an exception
 		if (_monsters[mon->id()] == mon) _monsters.erase(mon->id());
-		else throw P2EMonException(P2EMON_ERR_MONSTER_MISMATCH);
+		else throw Exception(P2EMON_ERR_MONSTER_MISMATCH);
 	}
 	else {
 		// If the monster is not in the record, do nothing
@@ -67,7 +67,7 @@ void Core::remove(Monster* mon) {
 	}
 
 	// Should not reach this
-	throw P2EMonException(P2EMON_ERR);
+	throw Exception(P2EMON_ERR);
 }
 
 void Core::remove(uint id) {
