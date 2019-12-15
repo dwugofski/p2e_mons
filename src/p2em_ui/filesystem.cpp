@@ -81,7 +81,6 @@ namespace ultralight {
 
 	static bool getFindData(LPCWSTR path, WIN32_FIND_DATAW& findData)
 	{
-		printf("Yo\n");
 		HANDLE handle = FindFirstFileW(path, &findData);
 		if (handle == INVALID_HANDLE_VALUE)
 			return false;
@@ -91,7 +90,6 @@ namespace ultralight {
 
 	static bool getFileSizeFromFindData(const WIN32_FIND_DATAW& findData, int64_t& size)
 	{
-		printf("Yo\n");
 		ULARGE_INTEGER fileSize;
 		fileSize.HighPart = findData.nFileSizeHigh;
 		fileSize.LowPart = findData.nFileSizeLow;
@@ -105,7 +103,6 @@ namespace ultralight {
 
 	static bool getFileSizeFromByHandleFileInformationStructure(const BY_HANDLE_FILE_INFORMATION& fileInformation, int64_t& size)
 	{
-		printf("Yo\n");
 		ULARGE_INTEGER fileSize;
 		fileSize.HighPart = fileInformation.nFileSizeHigh;
 		fileSize.LowPart = fileInformation.nFileSizeLow;
@@ -119,7 +116,6 @@ namespace ultralight {
 
 	static void getFileCreationTimeFromFindData(const WIN32_FIND_DATAW& findData, time_t& time)
 	{
-		printf("Yo\n");
 		ULARGE_INTEGER fileTime;
 		fileTime.HighPart = findData.ftCreationTime.dwHighDateTime;
 		fileTime.LowPart = findData.ftCreationTime.dwLowDateTime;
@@ -131,7 +127,6 @@ namespace ultralight {
 
 	static void getFileModificationTimeFromFindData(const WIN32_FIND_DATAW& findData, time_t& time)
 	{
-		printf("Yo\n");
 		ULARGE_INTEGER fileTime;
 		fileTime.HighPart = findData.ftLastWriteTime.dwHighDateTime;
 		fileTime.LowPart = findData.ftLastWriteTime.dwLowDateTime;
@@ -142,7 +137,6 @@ namespace ultralight {
 
 	bool getFileSize(LPCWSTR path, int64_t& size)
 	{
-		printf("Yo\n");
 		WIN32_FIND_DATAW findData;
 		if (!getFindData(path, findData))
 			return false;
@@ -152,7 +146,6 @@ namespace ultralight {
 
 	bool getFileSize(FileHandle fileHandle, int64_t& size)
 	{
-		printf("Yo\n");
 		BY_HANDLE_FILE_INFORMATION fileInformation;
 		if (!::GetFileInformationByHandle((HANDLE)fileHandle, &fileInformation))
 			return false;
@@ -162,7 +155,6 @@ namespace ultralight {
 
 	bool getFileModificationTime(LPCWSTR path, time_t& time)
 	{
-		printf("Yo\n");
 		WIN32_FIND_DATAW findData;
 		if (!getFindData(path, findData))
 			return false;
@@ -173,7 +165,6 @@ namespace ultralight {
 
 	bool getFileCreationTime(LPCWSTR path, time_t& time)
 	{
-		printf("Yo\n");
 		WIN32_FIND_DATAW findData;
 		if (!getFindData(path, findData))
 			return false;
@@ -184,7 +175,6 @@ namespace ultralight {
 
 	std::wstring GetMimeType(const std::wstring& szExtension)
 	{
-		printf("Yo\n");
 		// return mime type for extension
 		HKEY hKey = NULL;
 		std::wstring szResult = L"application/unknown";
@@ -216,34 +206,28 @@ namespace ultralight {
 	FileSystemWin::FileSystemWin(LPCWSTR baseDir) {
 		baseDir_.reset(new WCHAR[_MAX_PATH]);
 		StringCchCopyW(baseDir_.get(), MAX_PATH, baseDir);
-		wprintf(L"Making a file system %s\n", baseDir);
 	}
 
 	FileSystemWin::~FileSystemWin() {}
 
 	bool FileSystemWin::FileExists(const String16& path) {
-		printf("searching for a file\n");
 		WIN32_FIND_DATAW findData;
 		return getFindData(GetRelative(path).get(), findData);
 	}
 
 	bool FileSystemWin::DeleteFile_(const String16& path) {
-		printf("Yo\n");
 		return !!DeleteFileW(GetRelative(path).get());
 	}
 
 	bool FileSystemWin::DeleteEmptyDirectory(const String16& path) {
-		printf("Yo\n");
 		return !!RemoveDirectoryW(GetRelative(path).get());
 	}
 
 	bool FileSystemWin::MoveFile_(const String16& old_path, const String16& new_path) {
-		printf("Yo\n");
 		return !!::MoveFileExW(GetRelative(old_path).get(), GetRelative(new_path).get(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING);
 	}
 
 	bool FileSystemWin::GetFileSize(const String16& path, int64_t& result) {
-		printf("Yo\n");
 		WIN32_FIND_DATAW findData;
 		if (!getFindData(GetRelative(path).get(), findData))
 			return false;
@@ -253,7 +237,6 @@ namespace ultralight {
 
 	bool FileSystemWin::GetFileMimeType(const String16& path, String16& result)
 	{
-		printf("Yo\n");
 		LPWSTR ext = PathFindExtensionW(path.data());
 		std::wstring mimetype = GetMimeType(ext);
 		result = String16(mimetype.c_str(), mimetype.length());
@@ -261,7 +244,6 @@ namespace ultralight {
 	}
 
 	bool FileSystemWin::GetFileSize(FileHandle handle, int64_t& result) {
-		printf("Yo\n");
 		BY_HANDLE_FILE_INFORMATION fileInformation;
 		if (!::GetFileInformationByHandle((HANDLE)handle, &fileInformation))
 			return false;
@@ -270,7 +252,6 @@ namespace ultralight {
 	}
 
 	bool FileSystemWin::GetFileModificationTime(const String16& path, time_t& result) {
-		printf("Yo\n");
 		WIN32_FIND_DATAW findData;
 		if (!getFindData(GetRelative(path).get(), findData))
 			return false;
@@ -280,7 +261,6 @@ namespace ultralight {
 	}
 
 	bool FileSystemWin::GetFileCreationTime(const String16& path, time_t& result) {
-		printf("Yo\n");
 		WIN32_FIND_DATAW findData;
 		if (!getFindData(GetRelative(path).get(), findData))
 			return false;
@@ -290,7 +270,6 @@ namespace ultralight {
 	}
 
 	MetadataType FileSystemWin::GetMetadataType(const String16& path) {
-		printf("Yo\n");
 		WIN32_FIND_DATAW findData;
 		if (!getFindData(GetRelative(path).get(), findData))
 			return kMetadataType_Unknown;
@@ -299,7 +278,6 @@ namespace ultralight {
 	}
 
 	String16 FileSystemWin::GetPathByAppendingComponent(const String16& path, const String16& component) {
-		printf("Yo\n");
 		if (path.length() > MAX_PATH)
 			return String16();
 
@@ -314,7 +292,6 @@ namespace ultralight {
 	}
 
 	bool FileSystemWin::CreateDirectory_(const String16& path) {
-		printf("Yo\n");
 		if (SHCreateDirectoryExW(0, GetRelative(path).get(), 0) != ERROR_SUCCESS) {
 			DWORD error = GetLastError();
 			if (error != ERROR_FILE_EXISTS && error != ERROR_ALREADY_EXISTS) {
@@ -327,18 +304,15 @@ namespace ultralight {
 	}
 
 	String16 FileSystemWin::GetHomeDirectory() {
-		printf("Yo\n");
 		return String16();
 	}
 
 	String16 FileSystemWin::GetFilenameFromPath(const String16& path) {
-		printf("Yo\n");
 		LPWSTR filename = ::PathFindFileNameW(path.data());
 		return String16(filename, wcslen(filename));
 	}
 
 	String16 FileSystemWin::GetDirectoryNameFromPath(const String16& path) {
-		printf("Yo\n");
 		std::unique_ptr<Char16[]> utf16(new Char16[path.length()]);
 		memcpy(utf16.get(), path.data(), path.length() * sizeof(Char16));
 		if (::PathRemoveFileSpecW(utf16.get()))
@@ -348,12 +322,10 @@ namespace ultralight {
 	}
 
 	bool FileSystemWin::GetVolumeFreeSpace(const String16& path, uint64_t& result) {
-		printf("Yo\n");
 		return false;
 	}
 
 	int32_t FileSystemWin::GetVolumeId(const String16& path) {
-		printf("Yo\n");
 		HANDLE handle = (HANDLE)OpenFile(path, false);
 		if (handle == INVALID_HANDLE_VALUE)
 			return 0;
@@ -370,7 +342,6 @@ namespace ultralight {
 	}
 
 	Ref<String16Vector> FileSystemWin::ListDirectory(const String16& path, const String16& filter) {
-		printf("Yo\n");
 		Ref<String16Vector> entries = String16Vector::Create();
 
 		PathWalker walker(GetRelative(path).get(), filter.data());
@@ -389,7 +360,6 @@ namespace ultralight {
 	}
 
 	String16 FileSystemWin::OpenTemporaryFile(const String16& prefix, FileHandle& handle) {
-		printf("Yo\n");
 		handle = (FileHandle)INVALID_HANDLE_VALUE;
 
 		wchar_t tempPath[MAX_PATH];
@@ -423,7 +393,6 @@ namespace ultralight {
 	}
 
 	FileHandle FileSystemWin::OpenFile(const String16& path, bool open_for_writing) {
-		printf("Yo\n");
 		DWORD desiredAccess = 0;
 		DWORD creationDisposition = 0;
 		DWORD shareMode = 0;
@@ -442,7 +411,6 @@ namespace ultralight {
 	}
 
 	void FileSystemWin::CloseFile(FileHandle& handle) {
-		printf("Yo\n");
 		if (handle != (FileHandle)INVALID_HANDLE_VALUE) {
 			::CloseHandle((HANDLE)handle);
 			handle = (FileHandle)INVALID_HANDLE_VALUE;
@@ -450,7 +418,6 @@ namespace ultralight {
 	}
 
 	int64_t FileSystemWin::SeekFile(FileHandle handle, int64_t offset, FileSeekOrigin origin) {
-		printf("Yo\n");
 		DWORD moveMethod = FILE_BEGIN;
 
 		if (origin == kFileSeekOrigin_Current)
@@ -470,12 +437,10 @@ namespace ultralight {
 	}
 
 	bool FileSystemWin::TruncateFile(FileHandle handle, int64_t offset) {
-		printf("Yo\n");
 		return false;
 	}
 
 	int64_t FileSystemWin::WriteToFile(FileHandle handle, const char* data, int64_t length) {
-		printf("Yo\n");
 		if (handle == (FileHandle)INVALID_HANDLE_VALUE)
 			return -1;
 
@@ -488,7 +453,6 @@ namespace ultralight {
 	}
 
 	int64_t FileSystemWin::ReadFromFile(FileHandle handle, char* data, int64_t length) {
-		printf("Yo\n");
 		if (handle == (FileHandle)INVALID_HANDLE_VALUE)
 			return -1;
 
@@ -505,29 +469,23 @@ namespace ultralight {
 	}
 
 	std::unique_ptr<WCHAR[]> FileSystemWin::GetRelative(const String16& path) {
-		printf("Yo\n");
-		//printf("%s\n", path.data());
 		std::unique_ptr<WCHAR[]> relPath(new WCHAR[_MAX_PATH]);
 		PathCombineW(relPath.get(), baseDir_.get(), path.data());
 		//PathCchCombine(relPath.get(), _MAX_PATH, baseDir_.get(), path.data());
 		return relPath;
 	}
 
-}  // namespace ultralight
+	FileSystem* CreatePlatformFileSystem(const char* baseDir) {
+		std::string baseDirStr(baseDir);
+		std::wstring baseDirWStr(baseDirStr.begin(), baseDirStr.end());
 
-//namespace framework {
-//
-//	ultralight::FileSystem* CreatePlatformFileSystem(const char* baseDir) {
-//		std::string baseDirStr(baseDir);
-//		std::wstring baseDirWStr(baseDirStr.begin(), baseDirStr.end());
-//
-//		WCHAR cur_dir[_MAX_PATH];
-//		GetCurrentDirectoryW(_MAX_PATH, cur_dir);
-//		WCHAR absolute_dir[_MAX_PATH];
-//		PathCombineW(absolute_dir, cur_dir, baseDirWStr.c_str());
-//		//PathCchCombine(absolute_dir, _MAX_PATH, cur_dir, baseDirWStr.c_str());
-//
-//		return new ultralight::FileSystemWin(absolute_dir);
-//	}
-//
-//}
+		WCHAR cur_dir[_MAX_PATH];
+		GetCurrentDirectoryW(_MAX_PATH, cur_dir);
+		WCHAR absolute_dir[_MAX_PATH];
+		PathCombineW(absolute_dir, cur_dir, baseDirWStr.c_str());
+		//PathCchCombine(absolute_dir, _MAX_PATH, cur_dir, baseDirWStr.c_str());
+
+		return new ultralight::FileSystemWin(absolute_dir);
+	}
+
+}  // namespace ultralight

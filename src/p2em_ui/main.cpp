@@ -12,72 +12,87 @@
 
 ultralight::FileSystem* file_system = nullptr;
 
-namespace framework {
-
-	ultralight::FileSystem* CreatePlatformFileSystem(const char* baseDir) {
-		std::string baseDirStr(baseDir);
-		std::wstring baseDirWStr(baseDirStr.begin(), baseDirStr.end());
-
-		WCHAR cur_dir[_MAX_PATH];
-		GetCurrentDirectoryW(_MAX_PATH, cur_dir);
-		WCHAR absolute_dir[_MAX_PATH];
-		PathCombineW(absolute_dir, cur_dir, baseDirWStr.c_str());
-		//PathCchCombine(absolute_dir, _MAX_PATH, cur_dir, baseDirWStr.c_str());
-
-		return new ultralight::FileSystemWin(absolute_dir);
-	}
-
-}
-
 using namespace ultralight;
 
+class P2EMonUI : public WindowListener {
+	RefPtr<App> app_;
+	RefPtr<Window> window_;
+	RefPtr<Overlay> overlay_;
+
+public:
+	P2EMonUI() {
+		///
+		/// Create our main App instance.
+		///
+		app_ = App::Create();
+
+		///
+		/// Configure our FileSystem and root directory
+		///
+		file_system = CreatePlatformFileSystem("E:\\David\\Personal Documents\\git\\p2e_mons\\res\\");
+		Platform::instance().set_file_system(file_system);
+
+		///
+		/// Create our Window with the Resizable window flag.
+		///
+		window_ = Window::Create(app_->main_monitor(), 300, 300, false,
+			kWindowFlags_Titled | kWindowFlags_Resizable);
+
+		///
+		/// Set our window title.
+		///
+		window_->SetTitle("Tutorial 3 - Resize Me!");
+
+		///
+		/// Bind our App's main window.
+		///
+		/// @note This MUST be done before creating any overlays or calling App::Run
+		///
+		app_->set_window(*window_.get());
+
+		///
+		/// Create our Overlay, use the same dimensions as our Window.
+		///
+		overlay_ = Overlay::Create(*window_.get(), window_->width(),
+			window_->height(), 0, 0);
+
+		///
+		/// Load a string of HTML into our overlay's View
+		///
+		overlay_->view()->LoadURL("file:///p2em_ui/html/main.html");
+
+		///
+		/// Register our MyApp instance as a WindowListener so we can handle the
+		/// Window's OnResize event below.
+		///
+		window_->set_listener(this);
+	}
+
+	virtual ~P2EMonUI() {}
+
+	///
+	/// Inherited from WindowListener, not used.
+	///
+	virtual void OnClose() {}
+
+	///
+	/// Inherited from WindowListener, called when the Window is resized.
+	///
+	virtual void OnResize(int width, int height) {
+		///
+		/// Resize our Overlay to match the new Window dimensions.
+		///
+		overlay_->Resize(width, height);
+	}
+
+	void Run() {
+		app_->Run();
+	}
+};
+
 int main() {
-
-	///
-	/// Create our main App instance.
-	///
-	auto app = App::Create();
-
-	file_system = framework::CreatePlatformFileSystem("E:\\David\\Personal Documents\\git\\p2e_mons\\res\\p2em_ui\\");
-	auto& platform = Platform::instance();
-	platform.set_file_system(file_system);
-	file_system = Platform::instance().file_system();
-	ultralight::String16 path("html\\main.html");
-	bool doesexist = file_system->FileExists(path);
-
-	///
-	/// Create our Window using default window flags.
-	///
-	auto window = Window::Create(app->main_monitor(), 300, 300, false, kWindowFlags_Titled);
-
-	///
-	/// Set our window title.
-	///
-	window->SetTitle("Tutorial 2 - Basic App");
-
-	///
-	/// Bind our App's main window.
-	///
-	/// @note This MUST be done before creating any overlays or calling App::Run
-	///
-	app->set_window(window);
-
-	///
-	/// Create our Overlay, use the same dimensions as our Window.
-	///
-	auto overlay = Overlay::Create(window, window->width(), window->height(), 0, 0);
-
-	///
-	/// Load a string of HTML into our overlay's View
-	///
-	ultralight::String url = "file:///html/main.html";
-	ultralight::Ref<ultralight::View> view = overlay->view();
-	view->LoadURL(url);
-
-	///
-	/// Run our main loop.
-	///
-	app->Run();
+	P2EMonUI app;
+	app.Run();
 
 	return 0;
 }

@@ -132,8 +132,17 @@
     <ClInclude Include="..\..\inc\p2em_core.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\p2em_attribute.cpp" />
     <ClCompile Include="..\..\src\p2em_core.cpp" />
+    <ClCompile Include="..\..\src\p2em_maxval.cpp" />
+    <ClCompile Include="..\..\src\p2em_minval.cpp" />
+    <ClCompile Include="..\..\src\p2em_modval.cpp" />
     <ClCompile Include="..\..\src\p2em_monster.cpp" />
+    <ClCompile Include="..\..\src\p2em_numval.cpp" />
+    <ClCompile Include="..\..\src\p2em_sumval.cpp" />
+    <ClCompile Include="..\..\src\p2em_transval.cpp" />
+    <ClCompile Include="..\..\src\p2em_updateable.cpp" />
+    <ClCompile Include="..\..\src\p2em_aggval.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
