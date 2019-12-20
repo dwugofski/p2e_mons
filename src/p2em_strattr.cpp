@@ -1,4 +1,4 @@
-#include "p2em_core.h"
+#include "p2em_core.hpp"
 
 using namespace p2em_core;
 

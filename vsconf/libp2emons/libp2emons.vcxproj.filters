@@ -15,11 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\p2em_core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\src\p2em_monster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -44,29 +39,31 @@
     <ClCompile Include="..\..\src\p2em_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_aggval.hpp">
+    <ClCompile Include="..\..\src\p2em_condmod.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_condmod.hpp">
+    <ClCompile Include="..\..\src\p2em_aggval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_maxval.hpp">
+    <ClCompile Include="..\..\src\p2em_maxval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_minval.hpp">
+    <ClCompile Include="..\..\src\p2em_minval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_modval.hpp">
+    <ClCompile Include="..\..\src\p2em_modval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_numval.hpp">
+    <ClCompile Include="..\..\src\p2em_numval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_sumval.hpp">
+    <ClCompile Include="..\..\src\p2em_sumval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_transval.hpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\inc\p2em_core.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

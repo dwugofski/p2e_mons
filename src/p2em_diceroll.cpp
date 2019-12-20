@@ -1,4 +1,4 @@
-#include "p2em_core.h"
+#include "p2em_core.hpp"
 #include <stdlib.h>
 #include <time.h>
 #include <tuple>

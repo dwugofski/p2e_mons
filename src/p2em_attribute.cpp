@@ -1,5 +1,5 @@
 
-#include "p2em_core.h"
+#include "p2em_core.hpp"
 
 using namespace p2em_core;
 
@@ -23,7 +23,7 @@ void Attribute::name(const string& name) {
 	_name = name;
 }
 
-Attribute& Attribute::operator=(const Attribute& rhs) {
-	if (!validate(rhs.toString())) throw new Exception(ExceptionCode::INVALID_VALUE);
-	return operator=(rhs.toString());
-}
+//Attribute& Attribute::operator=(const Attribute& rhs) {
+//	if (!validate(rhs.toString())) throw new Exception(ExceptionCode::INVALID_VALUE);
+//	return operator=(rhs.toString());
+//}

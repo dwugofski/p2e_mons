@@ -1,9 +1,6 @@
-
-#include "p2em_core.h"
+#include "p2em_core.hpp"
 #include <ctime>
 #include <cstdlib>
-#include "../src/p2em_numval.hpp"
-#include "../src/p2em_condmod.hpp"
 
 #define ID_CREATE_TRYCOUNT_LIMIT	100
 
@@ -12,58 +9,33 @@ using namespace p2em_core;
 void Monster::_init(Core& core) {
 	core.add(this);
 	_core = &core;
-	/*
-	CondMod<int> perception;
-	vector<string> languages;
-	vector<CondMod<int>> skills;
-	CondMod<int> strength;
-	CondMod<int> dexterity;
-	CondMod<int> constitution;
-	CondMod<int> intelligence;
-	CondMod<int> wisdom;
-	CondMod<int> charisma;
-	vector<string> items;
-	vector<Feat> interactions;
-	CondMod<int> armor;
-	CondMod<int> fortitude;
-	CondMod<int> reflex;
-	CondMod<int> will;
-	CondMod<int> hitpoints;
-	vector<string> immunities;
-	vector<CondMod<int>> weaknesses;
-	vector<CondMod<int>> resistances;
-	vector<Feat> offturn_feats;
-	vector<CondMod<int>> speeds;
-	// actions and spells
-	vector<Feat> onturn_feats;
-	*/
 
-	level = NumVal<int>("Level");
+	level = NumVal("Level");
 	alignment = AlignmentAttr("Alignment");
-	perception = CondMod<int>("Perception");
+	perception = CondMod("Perception");
 	languages = vector<string>();
-	skills = vector<CondMod<int>>();
-	strength = CondMod<int>("Strength");
-	dexterity = CondMod<int>("Dexterity");
-	constitution = CondMod<int>("Constitution");
-	intelligence = CondMod<int>("Intelligence");
-	wisdom = CondMod<int>("Wisdom");
-	charisma = CondMod<int>("Charisma");
+	skills = vector<CondMod>();
+	strength = CondMod("Strength");
+	dexterity = CondMod("Dexterity");
+	constitution = CondMod("Constitution");
+	intelligence = CondMod("Intelligence");
+	wisdom = CondMod("Wisdom");
+	charisma = CondMod("Charisma");
 	items = vector<string>();
 	interactions = vector<Feat>();
-	armor = CondMod<int>("Armor");
-	fortitude = CondMod<int>("Fortitude");
-	reflex = CondMod<int>("Reflex");
-	will = CondMod<int>("Will");
-	maxhp = CondMod<int>("Maximum Hitpoints"); maxhp.addDependency(*this); maxhp.addCallback(this, Monster::_update_hp);
-	temphp = NumVal<int>("Temporary Hitpoints"); temphp.addDependency(*this); temphp.addCallback(this, Monster::_update_hp);
-	damage = NumVal<int>("Damage Taken"); damage.addDependency(*this); damage.addCallback(this, Monster::_update_hp);
-	_hitpoints = NumVal<int>("Hitpoints"); maxhp.addDependency(*this); maxhp.addCallback(this, Monster::_update_hp);
+	armor = CondMod("Armor");
+	fortitude = CondMod("Fortitude");
+	reflex = CondMod("Reflex");
+	will = CondMod("Will");
+	maxhp = CondMod("Maximum Hitpoints"); maxhp.addDependency(*this); maxhp.addCallback(this, Monster::_update_hp);
+	temphp = NumVal("Temporary Hitpoints"); temphp.addDependency(*this); temphp.addCallback(this, Monster::_update_hp);
+	damage = NumVal("Damage Taken"); damage.addDependency(*this); damage.addCallback(this, Monster::_update_hp);
+	_hitpoints = NumVal("Hitpoints"); maxhp.addDependency(*this); maxhp.addCallback(this, Monster::_update_hp);
 	immunities = vector<string>();
-	resistances = vector<CondMod<int>>();
-	weaknesses = vector<CondMod<int>>();
+	resistances = vector<CondMod>();
+	weaknesses = vector<CondMod>();
 	offturn_feats = vector<Feat>();
-	speeds = vector<CondMod<int>>();
+	speeds = vector<CondMod>();
 	actions = vector<Action>();
 	spelllists = vector<SpellList>();
 	onturn_feats = vector<Feat>();
@@ -94,5 +66,5 @@ Registry& Monster::reg() const {
 }
 
 int Monster::hp() const {
-	return _hitpoints;
+	return (int)(_hitpoints);
 }
