@@ -1,8 +1,11 @@
+#pragma once
+#ifndef __P2EM_MAXVAL_HPP__
+#define __P2EM_MAXVAL_HPP__
+
 #include "p2em_core.h"
 #include <errno.h>
 #include <limits>
-
-#define STRING_BUFFER_SIZE 100
+#include "../src/p2em_numval.hpp"
 
 using namespace p2em_core;
 
@@ -20,11 +23,6 @@ template<typename T_num_t> MaxVal<T_num_t>::MaxVal(const vector<NumVal<T_num_t>&
 template<typename T_num_t> MaxVal<T_num_t>::MaxVal(const string& name, const vector<NumVal<T_num_t>&>& startingvals, const T_num_t& baseval) : AggVal<T_num_t>(name, startingvals, baseval) {  }
 
 template<typename T_num_t>
-AttrType MaxVal<T_num_t>::attrType() const {
-	return P2E_ATTR_MAXVAL;
-}
-
-template<typename T_num_t>
 T_num_t MaxVal<T_num_t>::value() const {
 	if (this->overridden()) return this->_value;
 	T_num_t val = std::numeric_limits<T_num_t>::min();
@@ -40,3 +38,5 @@ void MaxVal<T_num_t>::onupdate() {
 	if (this->paused()) return;
 	OverrideableNumVal<T_num_t>::onupdate();
 }
+
+#endif

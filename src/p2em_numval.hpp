@@ -1,8 +1,9 @@
+#pragma once
+#ifndef __P2EM_NUMVAL_HPP__
+#define __P2EM_NUMVAL_HPP__
 
 #include "p2em_core.h"
 #include <errno.h>
-
-#define STRING_BUFFER_SIZE 100
 
 using namespace p2em_core;
 
@@ -39,13 +40,13 @@ NumVal<T_num_t>::NumVal(const Attribute& rhs) {
 
 template<typename T_num_t>
 AttrType NumVal<T_num_t>::attrType() const {
-	return P2E_ATTR_NUMVAL;
+	return AttrType::NUMERIC;
 }
 
 template<typename T_num_t>
 string NumVal<T_num_t>::toString() const {
 	char buff[STRING_BUFFER_SIZE];
-	snprintf(buff, STRING_BUFFER_SIZE, "%g", value());
+	snprintf(buff, STRING_BUFFER_SIZE, "%g", (double)(value()));
 	return string(buff);
 }
 
@@ -79,31 +80,11 @@ NumVal<T_num_t>& NumVal<T_num_t>::operator=(const T_num_t& rhs) {
 }
 
 template<typename T_num_t>
-Attribute& NumVal<T_num_t>::operator=(const Attribute& rhs) {
-	switch (rhs.attrType()) {
-	case P2E_ATTR_NUMVAL:
-	case P2E_ATTR_MODVAL:
-		// Implies a type conversion, but all numeric types must translate between themselves (pretty typical)
-		operator=(static_cast<const NumVal<T_num_t>&>(rhs));
-		break;
-	case P2E_ATTR_UINT:
-	case P2E_ATTR_INT:
-	case P2E_ATTR_DOUBLE:
-		if (!validate(rhs.toString())) throw new Exception(P2EMON_ERR_ATTR_TYPE_MISMATCH);
-		operator=(rhs.toString());
-		break;
-	default:
-		throw new Exception(P2EMON_ERR_ATTR_TYPE_MISMATCH);
-	}
-	return *this;
-}
-
-template<typename T_num_t>
 NumVal<T_num_t>& NumVal<T_num_t>::operator=(const string& newvalue) {
-	if (!validate(newvalue)) throw new Exception(P2EMON_ERR_INVALID_VALUE);
+	if (!validate(newvalue)) throw new Exception(ExceptionCode::INVALID_VALUE);
 	double converted = strtod(newvalue.c_str(), nullptr);
-	if (errno == ERANGE) throw new Exception(P2EMON_ERR_INVALID_VALUE);
-	value((T_num_t)newvalue);
+	if (errno == ERANGE) throw new Exception(ExceptionCode::INVALID_VALUE);
+	value((T_num_t)converted);
 	return *this;
 }
 
@@ -192,3 +173,4 @@ void OverrideableNumVal<T_num_t>::toggle_override() {
 	this->update();
 }
 
+#endif

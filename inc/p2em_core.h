@@ -12,9 +12,9 @@
 #include <unordered_map>
 #include <stdint.h>
 #include <exception>
+#include <tuple>
 
-#define P2EMON_NULL_ID				0
-#define P2EMON_NULL_NAME_STRING		"__NULL__"
+#define STRING_BUFFER_SIZE 256
 
 namespace p2em_core {
 
@@ -32,36 +32,29 @@ namespace p2em_core {
 	};
 	using modval = modvalT<uint>;
 
-	enum AttrType {
-		P2E_ATTR_INT,
-		P2E_ATTR_UINT,
-		P2E_ATTR_DOUBLE,
-		P2E_ATTR_STRING,
-		P2E_ATTR_NUMVAL,
-		P2E_ATTR_MODVAL,
-		P2E_ATTR_SUMVAL,
-		P2E_ATTR_MAXVAL,
-		P2E_ATTR_MINVAL,
-		P2E_ATTR_TRANSVAL,
+	enum class AttrType {
+		NUMERIC,
+		STRING,
 
-		P2E_ATTR_UNKNOWN,
+		UNKNOWN,
 	};
 
-	enum ExceptionCode {
-		P2EMON_ERR_INVALID_ID,
-		P2EMON_ERR_INVALID_NAME,
-		P2EMON_ERR_DUPLICATE_MONSTER,
-		P2EMON_ERR_MONSTER_NOT_FOUND,
-		P2EMON_ERR_MONSTER_MISMATCH,
-		P2EMON_ERR_ATTR_TYPE_MISMATCH,
-		P2EMON_ERR_ID_CREATION_TIMEOUT,
-		P2EMON_ERR_CIRCULAR_DEPS,
-		P2EMON_ERR_INVALID_VALUE,
+	enum class ExceptionCode {
+		INVALID_ID,
+		INVALID_NAME,
+		DUPLICATE_MONSTER,
+		MONSTER_NOT_FOUND,
+		MONSTER_MISMATCH,
+		ATTR_TYPE_MISMATCH,
+		ID_CREATION_TIMEOUT,
+		CIRCULAR_DEPS,
+		INVALID_VALUE,
+		INVALID_DICE_STRING,
 
-		P2EMON_ERR
+		ERROR
 	};
 
-	const string P2EMonExceptionStrings[P2EMON_ERR + 1] = {
+	const string P2EMonExceptionStrings[static_cast<int>(ExceptionCode::ERROR) + 1] = {
 		"Invalid monster name received!",
 		"Invalid monster id received!",
 		"Cannot create duplicate monsters!",
@@ -71,8 +64,60 @@ namespace p2em_core {
 		"Could not create new monster ID!",
 		"Could not add dependency: Dependency lists must not be circular!",
 		"Cannot set attribute to provided value!",
+		"Roll specification string does not match proper format!",
 
 		"Monster error!"
+	};
+
+	enum class Alignment {
+		CHAOTIC_EVIL,
+		CHAOTIC_GOOD,
+		CHAOTIC_NEUTRAL,
+		LAWFUL_EVIL,
+		LAWFUL_GOOD,
+		LAWFUL_NEUTRAL,
+		NEUTRAL,
+		NEUTRAL_EVIL,
+		NEUTRAL_GOOD,
+
+		UNALIGNED
+	};
+
+	enum class ActionCount {
+		FREE,
+		SINGLE,
+		DOUBLE,
+		TRIPLE,
+		REACTION,
+
+		PASSIVE
+	};
+
+	enum class Die {
+		TWO,
+		THREE,
+		FOUR,
+		SIX,
+		EIGHT,
+		TEN,
+		TWELVE,
+		TWENTY,
+		HUNDRED
+	};
+
+	enum class SpellTradition {
+		ARCANE,
+		DIVINE,
+		OCCULT,
+		PRIMAL,
+	};
+
+	enum class SpellCastingType {
+		PREPARED,
+		SPONTANEOUS,
+		INNATE,
+		RITUAL,
+		FOCUS
 	};
 
 	class Core;
@@ -82,13 +127,19 @@ namespace p2em_core {
 	class Monster;
 	class Object;
 
-	class Core {
+	struct Registry {
+		virtual bool has(uint id) const = 0;
+		virtual uint newid() const = 0;
+	};
+
+	class Core : public Registry {
 	protected:
 		umap<uint, Monster*> _monsters;
 	public:
 		Core();
 
-		bool has(uint id) const;
+		bool has(uint id) const override;
+		uint newid() const override;
 		bool has(const Monster* monster) const;
 		const Monster* get(uint id) const;
 
@@ -115,23 +166,27 @@ namespace p2em_core {
 
 	class Updateable {
 	protected:
-		vector<Updateable*> _depedencies;
+		vector<Updateable*> _dependencies;
 		vector<Updateable*> _parents;
-		vector<void (*)(Updateable*)> _callbacks;
+		vector<std::tuple<Updateable*, void (*)(Updateable*)>> _callbacks;
 		bool _paused = false;
 	public:
 		Updateable();
+		Updateable(const Updateable& source);
 		~Updateable();
 
+		vector<Updateable*> dependents() const;
+		vector<Updateable*> parents() const;
+		vector<std::tuple<Updateable*, void (*)(Updateable*)>> callbacks() const;
 		bool hasDependency(const Updateable& dep, bool recurse) const;
 		void addDependency(Updateable& dep);
 		void removeDependency(Updateable& dep);
 		bool hasParent(const Updateable& parent) const;
 		void addParent(Updateable& parent);
-		void removeParent(Updateable& parent);
-		bool hasCallback(void(*callback)(Updateable*)) const;
-		void addCallback(void(*callback)(Updateable*));
-		void removeCallback(void(*callback)(Updateable*));
+		virtual void removeParent(Updateable& parent);
+		bool hasCallback(const Updateable* src, void(*callback)(Updateable*)) const;
+		void addCallback(Updateable* src, void(*callback)(Updateable*));
+		void removeCallback(const Updateable* src, void(*callback)(Updateable*));
 		void pause();
 		void unpause();
 		bool paused();
@@ -145,6 +200,7 @@ namespace p2em_core {
 	public:
 		Attribute();
 		Attribute(const string& name);
+		Attribute(const Attribute& source);
 
 		virtual string name() const;
 		virtual void name(const string& name);
@@ -154,7 +210,7 @@ namespace p2em_core {
 		virtual string toString() const = 0;
 		virtual bool validate(const string& source) const = 0; // Determines whether a string will behave well. 
 
-		virtual Attribute& operator=(const Attribute& source) = 0;
+		virtual Attribute& operator=(const Attribute& source);
 		virtual Attribute& operator=(const string& source) = 0; // Should support an empty string as "reset to default," can produce Exceptions (P2EMON_ERR_INVALID_VALUE)
 	};
 
@@ -170,18 +226,18 @@ namespace p2em_core {
 		NumVal(const NumVal& source);
 		NumVal(const Attribute& source);
 
-		virtual AttrType attrType() const;
-		virtual string toString() const;
+		virtual AttrType attrType() const override;
+		virtual string toString() const override;
 
 		// Core functions for value change (do not access _value directly outside of this)
 		virtual T_num_t value() const;
 		virtual void value(const T_num_t& nuval);
+		// --end
 
-		virtual bool validate(const string& value) const;
+		virtual bool validate(const string& value) const override;
 
 		virtual NumVal& operator=(const NumVal& source);
 		virtual NumVal& operator=(const T_num_t& value);
-		virtual Attribute& operator=(const Attribute& source);
 		virtual NumVal& operator=(const string& value);
 
 		virtual operator T_num_t() const;
@@ -218,13 +274,12 @@ namespace p2em_core {
 
 		// Core functions for value change (do not access _value, _override directly outside of this)
 		// virtual T_num_t value() const; // No reason to change from NumVal.value()
-		virtual void value(const T_num_t& newval);
+		virtual void value(const T_num_t& newval) override;
 		virtual bool overridden() const;
 		virtual void set_override(bool new_override);
+		// --end
 
 		virtual void toggle_override();
-
-		virtual Attribute& operator=(const Attribute& source) = 0;
 	};
 
 	template<typename T_num_t>
@@ -251,29 +306,27 @@ namespace p2em_core {
 		ModVal(const ModVal& source);
 		~ModVal();
 
-		virtual AttrType attrType() const;
-		virtual string toString() const;
+		virtual string toString() const override;
 
 		// Core functions for value change (do not access _value, _base, _offset, _override directly outside of this)
-		virtual T_num_t value() const;
+		virtual T_num_t value() const override;
 		// virtual void value(const T_num_t& val); // Handled by OverrideableNumVal.value(const T_num_t&)
 		virtual T_num_t base() const;
 		virtual void base(const T_num_t& base);
 		virtual T_num_t offset() const;
 		virtual void offset(const T_num_t& offset);
+		virtual void onupdate() override;
+		// --end
 
-		virtual bool validate(const string& value) const;
-		virtual void onupdate();
+		virtual bool validate(const string& value) const override;
 
 		virtual ModVal& operator=(const ModVal& source);
-		virtual Attribute& operator=(const Attribute& source);
 		virtual ModVal& operator=(const string& source);
-
-		// virtual operator T_num_t() const; // Do not override; ensure that _value is always correct
 
 		virtual bool operator==(const ModVal& val2) const;
 	};
 
+	// May want to consider making this more generic...
 	template<typename T_num_t>
 	class AggVal : public OverrideableNumVal<T_num_t> {
 	protected:
@@ -292,22 +345,19 @@ namespace p2em_core {
 		AggVal(const vector<NumVal<T_num_t>*>& startingvals, const T_num_t& baseval);
 		AggVal(const string& name, const vector<NumVal<T_num_t>*>& startingvals, const T_num_t& baseval);
 
-		virtual AttrType attrType() const = 0;
-
 		// Core functions for value change (do not access _value, _values directly outside of this)
 		virtual vector<const NumVal<T_num_t>*> items() const;
 		virtual vector<NumVal<T_num_t>*> items();
 		virtual bool hasItem(const NumVal<T_num_t>& item) const;
 		virtual void addItem(NumVal<T_num_t>& newitem);
-		virtual void removeItem(const NumVal<T_num_t>& olditem);
-
+		virtual void removeItem(NumVal<T_num_t>& olditem);
 		virtual void onupdate() = 0;
-
-		//virtual Attribute& operator=(const Attribute& source);
+		virtual void removeParent(Updateable& oldparent) override; // Necessary, as items (parents) need to be removed from the _values list as well
+		// --end
 	};
 
 	template<typename T_num_t>
-	class SumVal : public OverrideableNumVal<T_num_t> {
+	class SumVal : public AggVal<T_num_t> {
 	public:
 		SumVal();
 		SumVal(const string& name);
@@ -322,15 +372,11 @@ namespace p2em_core {
 		SumVal(const vector<NumVal<T_num_t>&>& startingvals, const T_num_t& baseval);
 		SumVal(const string& name, const vector<NumVal<T_num_t>&>& startingvals, const T_num_t& baseval);
 
-		virtual AttrType attrType() const;
-
 		// Core functions for value change (do not access _value, _values directly outside of this)
-		virtual T_num_t value() const;
+		virtual T_num_t value() const override;
 		// virtual void value(const T_num_t& newvalue); // Call the OverrideableNumVal.value(const T_num_t&) virtual
-
-		virtual void onupdate();
-
-		//virtual Attribute& operator=(const Attribute& source);
+		virtual void onupdate() override;
+		// --end
 	};
 
 	template<typename T_num_t, typename T_src_t>
@@ -346,20 +392,18 @@ namespace p2em_core {
 		~TransVal();
 
 		// Core functions for value change (do not access _source, _value directly outside of this)
-		virtual T_num_t value() const;
-		virtual void value(const T_num_t& newvalue);
+		virtual T_num_t value() const override;
+		virtual void value(const T_num_t& newvalue) override;
 		virtual void value(const T_src_t& newvalue);
 		virtual void setSrc(NumVal<T_src_t>& src);
 		virtual const NumVal<T_src_t>& getSrc() const;
 		virtual NumVal<T_src_t>& getSrc();
-
-		virtual void onupdate();
-
-		//virtual Attribute& operator=(const Attribute& source);
+		virtual void onupdate() override;
+		// --end
 	};
 
 	template<typename T_num_t>
-	class MaxVal : public OverrideableNumVal<T_num_t> {
+	class MaxVal : public AggVal<T_num_t> {
 	public:
 		MaxVal();
 		MaxVal(const string& name);
@@ -374,19 +418,15 @@ namespace p2em_core {
 		MaxVal(const vector<NumVal<T_num_t>&>& startingvals, const T_num_t& baseval);
 		MaxVal(const string& name, const vector<NumVal<T_num_t>&>& startingvals, const T_num_t& baseval);
 
-		virtual AttrType attrType() const;
-
 		// Core functions for value change (do not access _value, _values directly outside of this)
-		virtual T_num_t value() const;
+		virtual T_num_t value() const override;
 		// virtual void value(const T_num_t& newvalue); // Call the OverrideableNumVal.value(const T_num_t&) virtual
-
-		virtual void onupdate();
-
-		//virtual Attribute& operator=(const Attribute& source);
+		virtual void onupdate() override;
+		// --end
 	};
 
 	template<typename T_num_t>
-	class MinVal : public OverrideableNumVal<T_num_t> {
+	class MinVal : public AggVal<T_num_t> {
 	public:
 		MinVal();
 		MinVal(const string& name);
@@ -401,42 +441,333 @@ namespace p2em_core {
 		MinVal(const vector<NumVal<T_num_t>&>& startingvals, const T_num_t& baseval);
 		MinVal(const string& name, const vector<NumVal<T_num_t>&>& startingvals, const T_num_t& baseval);
 
-		virtual AttrType attrType() const;
-
 		// Core functions for value change (do not access _value, _values directly outside of this)
-		virtual T_num_t value() const;
+		virtual T_num_t value() const override;
 		// virtual void value(const T_num_t& newvalue); // Call the OverrideableNumVal.value(const T_num_t&) virtual
-
-		virtual void onupdate();
-
-		//virtual Attribute& operator=(const Attribute& source);
+		virtual void onupdate() override;
+		// --end
 	};
 
-	class Object {
+	class StrAttr : public Attribute {
 	protected:
-		umap<string, Attribute*> _attrs;
+		string _value;
+	public:
+		StrAttr();
+		StrAttr(const string& value);
+		StrAttr(const string& name, const string& value);
+		StrAttr(const StrAttr& source);
+
+		virtual AttrType attrType() const override;
+
+		// Core functions for value change (do not access _value directly outside of this)
+		virtual string value() const;
+		virtual void value(const string& newval);
+		// --end
+
+		virtual string toString() const override;
+		virtual bool validate(const string& source) const override; // Determines whether a string will behave well.
+
+		virtual bool operator==(const string& rhs) const;
+		virtual bool operator==(const StrAttr& rhs) const;
+		virtual string operator+(const string& rhs) const;
+		virtual string operator+(const StrAttr& rhs) const;
+		virtual StrAttr& operator=(const string& source); // Should support an empty string as "reset to default," can produce Exceptions (P2EMON_ERR_INVALID_VALUE)
+		virtual StrAttr& operator=(const StrAttr& source);
+		virtual StrAttr& operator+=(const string& rhs);
+		virtual StrAttr& operator+=(const StrAttr& rhs);
+		virtual operator string() const;
+
+		virtual Attribute& operator=(const Attribute& source);
 	};
 
-	// Each instance of a monster
-	class Monster : public Object {
+	class AlignmentAttr : public StrAttr {
+	protected:
+		Alignment _alignment;
+	public:
+		AlignmentAttr();
+		AlignmentAttr(const string& name);
+		AlignmentAttr(const Alignment& value);
+		AlignmentAttr(const string& name, const Alignment& value);
+		AlignmentAttr(const string& name, const string& align_str);
+		AlignmentAttr(const AlignmentAttr& source);
+
+		// Core functions for value change (do not access _value, _alignment directly outside of this)
+		virtual Alignment avalue() const;
+		virtual string value() const override;
+		virtual void value(const string& newval) override;
+		virtual void value(const Alignment& newval);
+		// --end
+
+		// virtual string toString() const; // No need to replace StrAttr.toString()
+		virtual bool validate(const string& source) const override; // Determines whether a string will behave well.
+	};
+
+	template<typename T_num_t>
+	struct CondModOpt : public NumVal<T_num_t> {
+		string description;
+		bool selected;
+
+		CondModOpt();
+		CondModOpt(const T_num_t& val);
+		CondModOpt(const string& desc);
+		CondModOpt(const T_num_t& val, const string& desc);
+		CondModOpt(const bool& sel);
+		CondModOpt(const T_num_t& val, const bool& sel);
+		CondModOpt(const string& desc, const bool& sel);
+		CondModOpt(const T_num_t& val, const string& desc, const bool& sel);
+		CondModOpt(const CondModOpt& source);
+
+		virtual CondModOpt& operator=(const string& rhs);
+		virtual CondModOpt& operator=(const bool& rhs);
+		virtual CondModOpt& operator=(const CondModOpt& rhs);
+		virtual bool operator==(const string& rhs) const;
+		virtual bool operator==(const bool& rhs) const;
+		virtual bool operator==(const CondModOpt& rhs) const;
+
+		virtual operator string() const;
+		virtual operator bool() const;
+	};
+
+	template<typename T_num_t>
+	class CondMod : public ModVal<T_num_t> {
 	private:
-		void _init(Core* core, uint id);
+		void _init();
 	protected:
-		Core* _core;
+		SumVal<T_num_t> _agger;
+		vector<CondModOpt<T_num_t>*> _options;
+		vector<bool> _ownership;
+	public:
+		CondMod();
+		CondMod(const string& name);
+		CondMod(NumVal<T_num_t>& base);
+		CondMod(const string& name, NumVal<T_num_t>& base);
+		CondMod(const T_num_t& value);
+		CondMod(const string& name, const T_num_t& value);
+		CondMod(NumVal<T_num_t>& base, const T_num_t& value);
+		CondMod(const string& name, NumVal<T_num_t>& base, const T_num_t& value);
+		CondMod(const CondMod& source);
+		~CondMod();
+
+		// Core functions for value change (do not access _value, _alignment directly outside of this)
+		// virtual T_num_t value() const; // ModVal.value() should be good if the updating of ModVal._offset is proper
+		// virtual void value(const T_num_t& value); // The ModVal.value(...) should be good
+		// virtual T_num_t base() const;
+		// virtual void base(const T_num_t& newbase);
+		// virtual T_num_t offset() const;
+		// virtual void offset(const NumVal<T_num_t>& newoffset);
+		virtual bool hasOption(const CondModOpt<T_num_t>& testval) const;
+		virtual int addOption(CondModOpt<T_num_t>& newvalue, bool own = false);
+		virtual int createOption(T_num_t val = 0, string desc = "", bool selected = false);
+		virtual int createOption(const CondModOpt<T_num_t>& source);
+		virtual void removeOption(const int& index);
+		virtual void removeOption(const CondModOpt<T_num_t>& oldvalue);
+		virtual vector<const CondModOpt<T_num_t>*> options() const;
+		virtual vector<CondModOpt<T_num_t>*> options();
+		virtual int indexOf(const CondModOpt<T_num_t>& value) const;
+		virtual uint size() const;
+		// --end
+		
+		virtual const CondModOpt<T_num_t>& operator[](const int& index) const;
+		virtual CondModOpt<T_num_t>& operator[](const int& index);
+	};
+
+	class Traited {
+	protected:
+		vector<string> _traits;
+	public:
+		Traited();
+		Traited(const vector<string>& startings);
+		Traited(const Traited& source);
+
+		bool hasTrait(const string& tagnam) const;
+		void addTrait(const string& newtag);
+		void removeTrait(const string& oldtag);
+	};
+
+	class Feat : public Traited {
+	public:
+		string name;
+		ActionCount action_count;
+		string description;
+	};
+
+	class DiceRoll {
+	private:
+		vector<Die> _dice;
+		vector<int> _counts;
+		int _modifier;
+	public:
+		DiceRoll();
+		DiceRoll(const string& specification);
+		DiceRoll(const Die& die, int count = 1, int mod = 0);
+		DiceRoll(const DiceRoll& source);
+
+		int roll() const;
+		void add(const Die& dice, int count = 1, int mod = 0);
+		void add(const int& modifier);
+		void add(const DiceRoll& source);
+		void clear();
+		string spec() const;
+
+		void add(const string& specification);
+		void set(const Die& dice, int count = 1, int mod = 0);
+		void set(const string& specification);
+
+		operator string() const;
+
+		bool operator==(const DiceRoll& rhs) const;
+		bool operator==(const string& specification) const;
+
+		DiceRoll& operator=(const DiceRoll& rhs);
+		DiceRoll& operator=(const string& specification);
+
+		DiceRoll operator+(const DiceRoll& rhs) const;
+		DiceRoll operator+(const int& mod) const;
+		DiceRoll operator+(const string& specification) const;
+
+		DiceRoll& operator+=(const DiceRoll& rhs);
+		DiceRoll& operator+=(const int& mod);
+		DiceRoll& operator+=(const string& specification);
+	};
+
+	struct DamageSpec {
+		string type;
+		DiceRoll roll;
+	};
+
+	struct Action : public Traited {
+		string name;
+		string type;
+		ActionCount action_count;
+		int modifier;
+		vector<DamageSpec> damages;
+		vector<string> effects;
+	};
+
+	struct SpellLevelSummary {
+		int level;
+		int heightening;
+		int slotcount;
+		vector<string> spells;
+	};
+
+	struct SpellList {
+		SpellTradition tradition;
+		SpellCastingType type;
+		int difficulty;
+		int attack;
+		bool has_attack;
+		vector<SpellLevelSummary> levels;
+	};
+
+	class Object : public Traited, public Updateable {
+	private:
+		umap<string, Attribute*> _attrs;
+		umap<string, bool> _ownership;
+	protected:
 		uint _id;
 		string _name;
 	public:
+		static const string NULL_NAME_STR;
+		static const uint NULL_ID;
 
-		Monster(Core* core);
-		Monster(Core* core, const string& name);
-		Monster(Core* core, uint id);
-		Monster(Core* core, uint id, const string& name);
+		Object(const Registry& reg);
+		Object(const Registry& reg, const string& name);
+		Object(const Registry& reg, const uint& id);
+		Object(const Registry& reg, const uint& id, const string& name);
+		Object(const Registry& reg, const vector<string>& traits);
+		Object(const Registry& reg, const vector<string>& traits, const string& name);
+		Object(const Registry& reg, const vector<string>& traits, const uint& id);
+		Object(const Registry& reg, const vector<string>& traits, const uint& id, const string& name);
+		Object(const Object& source); // May want to fully support, with some sort of Attribute.copy() virtual function
+		~Object();
 
-		uint id() const;
-		void id(uint new_id);
+		bool hasAttr(const string& attrname) const;
+		bool hasAttr(const Attribute& attr) const;
+		void addAttr(Attribute& attr);
+		// void addAttr(const string& attrname); // Does not make sense, with Attribute being an abstract class
+		// void addAttr(Attribute& attr, const string& attrname); // Does not make sense unless we can rename/reconstruct Attributes
+		void removeAttr(const Attribute& attr);
+		void removeAttr(const string& attrname);
 
-		string name() const;
-		void name(const string& new_name);
+		string get(const string& attrname) const;
+		string get(const Attribute& attr) const;
+		int getInt(const string& attrname) const;
+		int getInt(const Attribute& attr) const;
+		uint getUInt(const string& attrname) const;
+		uint getUInt(const Attribute& attr) const;
+		double getD(const string& attrname) const;
+		double getD(const Attribute& attr) const;
+
+		virtual uint id() const;
+		virtual string name() const;
+		virtual void name(const string& newname);
+
+		virtual const Registry& reg() const = 0;
+		virtual Registry& reg() = 0;
+
+		virtual const Attribute& operator[](const string& attrname) const;
+		virtual Attribute& operator[](const string& attrname);
+		virtual const Attribute& operator[](const Attribute& attr) const;
+		virtual Attribute& operator[](const Attribute& attr);
+
+		virtual bool operator==(const Object& rhs) const;
+		// virtual Object& operator=(const Object& rhs); // Need to have a reason (i.e. copy constructor) for this
+	};
+
+	// Each instance (not template / definition) of a monster
+	class Monster : public Object {
+	private:
+		void _init(Core& core);
+		NumVal<int> _hitpoints;
+
+		static void _update_hp(Updateable *monster);
+	protected:
+		Core* _core;
+	public:
+		NumVal<int> level;
+		AlignmentAttr alignment;
+		CondMod<int> perception;
+		vector<string> languages;
+		vector<CondMod<int>> skills;
+		CondMod<int> strength;
+		CondMod<int> dexterity;
+		CondMod<int> constitution;
+		CondMod<int> intelligence;
+		CondMod<int> wisdom;
+		CondMod<int> charisma;
+		vector<string> items;
+		vector<Feat> interactions;
+		CondMod<int> armor;
+		CondMod<int> fortitude;
+		CondMod<int> reflex;
+		CondMod<int> will;
+		CondMod<int> maxhp;
+		NumVal<int> temphp;
+		NumVal<int> damage;
+		vector<string> immunities;
+		vector<CondMod<int>> weaknesses;
+		vector<CondMod<int>> resistances;
+		vector<Feat> offturn_feats;
+		vector<CondMod<int>> speeds;
+		vector<Action> actions;
+		vector<SpellList> spelllists;
+		vector<Feat> onturn_feats;
+
+		Monster(Core& core);
+		Monster(Core& core, const string& name);
+		Monster(Core& core, const uint& id);
+		Monster(Core& core, const uint& id, const string& name);
+		Monster(Core& core, const vector<string>& tags);
+		Monster(Core& core, const vector<string>& tags, const string& name);
+		Monster(Core& core, const vector<string>& tags, const uint& id);
+		Monster(Core& core, const vector<string>& tags, const uint& id, const string& name);
+		Monster(const Monster& source);
+
+		Core& core() const;
+		Registry& reg() const override;
+
+		int hp() const;
 	};
 }
 

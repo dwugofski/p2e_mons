@@ -1,5 +1,9 @@
 
 #include "p2em_core.h"
+#include <stdlib.h>
+#include <time.h>
+
+#define ID_CREATE_TRYCOUNT_LIMIT	100
 
 using namespace p2em_core;
 
@@ -8,13 +12,13 @@ Exception::Exception(ExceptionCode excode, const string& msg) {
 	_msg = msg;
 }
 
-Exception::Exception(ExceptionCode excode) : Exception::Exception(excode, P2EMonExceptionStrings[excode]) {} ;
+Exception::Exception(ExceptionCode excode) : Exception::Exception(excode, P2EMonExceptionStrings[(int)(excode)]) {} ;
 
 ExceptionCode Exception::code() const { return _code; }
 string Exception::msg() const { return _msg; }
 
 Core::Core() {
-	umap<uint, Monster*> _monsters = { {P2EMON_NULL_ID, nullptr} };
+	umap<uint, Monster*> _monsters = { {Object::NULL_ID, nullptr} };
 }
 
 bool Core::has(uint id) const {
@@ -25,8 +29,25 @@ bool Core::has(const Monster* mon) const {
 	return has(mon->id());
 }
 
+uint Core::newid() const {
+	uint trycount = 0;
+	uint id = 0;
+	bool found = true;
+
+	srand((unsigned int)(time(0)));
+
+	// Try to find an unused ID
+	while (found) {
+		if (trycount++ >= ID_CREATE_TRYCOUNT_LIMIT) throw Exception(ExceptionCode::ID_CREATION_TIMEOUT);
+		id = rand();
+		found = has(id);
+	}
+
+	return id;
+}
+
 Monster* Core::get(uint id) {
-	if (!has(id)) throw Exception(P2EMON_ERR_MONSTER_NOT_FOUND);
+	if (!has(id)) throw Exception(ExceptionCode::MONSTER_NOT_FOUND);
 	return _monsters[id];
 }
 
@@ -43,7 +64,7 @@ void Core::add(Monster* mon) {
 	if (has(mon->id())) {
 		// If the monster is already in the record, do nothing; otherwise raise an exception
 		if (_monsters[mon->id()] == mon) return;
-		else throw Exception(P2EMON_ERR_DUPLICATE_MONSTER);
+		else throw Exception(ExceptionCode::DUPLICATE_MONSTER);
 	}
 	else {
 		// Add the new monster
@@ -51,7 +72,7 @@ void Core::add(Monster* mon) {
 	}
 
 	// Should not reach this
-	throw Exception(P2EMON_ERR);
+	throw Exception(ExceptionCode::ERROR);
 }
 
 void Core::remove(Monster* mon) {
@@ -59,7 +80,7 @@ void Core::remove(Monster* mon) {
 	if (has(mon->id())) {
 		// If the monster matches the record, remove it; otherwise raise an exception
 		if (_monsters[mon->id()] == mon) _monsters.erase(mon->id());
-		else throw Exception(P2EMON_ERR_MONSTER_MISMATCH);
+		else throw Exception(ExceptionCode::MONSTER_MISMATCH);
 	}
 	else {
 		// If the monster is not in the record, do nothing
@@ -67,7 +88,7 @@ void Core::remove(Monster* mon) {
 	}
 
 	// Should not reach this
-	throw Exception(P2EMON_ERR);
+	throw Exception(ExceptionCode::ERROR);
 }
 
 void Core::remove(uint id) {

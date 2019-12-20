@@ -1,16 +1,19 @@
+#pragma once
+#ifndef __P2EM_MODVAL_HPP__
+#define __P2EM_MODVAL_HPP__
 
 #include "p2em_core.h"
 #include <sstream>
+#include "../src/p2em_numval.hpp"
 
-#define VALUE_DELIMITER ','
-#define STRING_BUFFER_SIZE 256
+#define MODVAL_VALUE_DELIMITER ','
 
 using namespace p2em_core;
 
 template<typename T_num_t>
 void ModVal<T_num_t>::_link() {
-	_base.addDependency(this);
-	_offset.addDependency(this);
+	_base.addDependency(*this);
+	_offset.addDependency(*this);
 }
 
 template<typename T_num_t>
@@ -19,86 +22,87 @@ vector<T_num_t> ModVal<T_num_t>::_splitstring(const string& newval) const {
 	double parsed = 0.0;
 	std::stringstream ss(newval);
 	string token;
-	while (std::getline(ss, token, VALUE_DELIMITER)) {
+	while (std::getline(ss, token, MODVAL_VALUE_DELIMITER)) {
 		parsed = strtod(token.c_str(), nullptr);
-		if (errno == ERANGE) throw new Exception(P2EMON_ERR_INVALID_VALUE);
+		if (errno == ERANGE) throw new Exception(ExceptionCode::INVALID_VALUE);
 		ret.push_back((T_num_t)parsed);
 	}
+	return ret;
 }
 
 template<typename T_num_t>
-ModVal<T_num_t>::ModVal() : OverrideableNumVal<T_num_t>() {
-	NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
-	NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
+ModVal<T_num_t>::ModVal() : OverrideableNumVal<T_num_t>(), _base(*new NumVal<T_num_t>(0)), _offset(*new NumVal<T_num_t>(0)) {
+	// NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
+	// NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
 	_ownsbase = true;
 	_ownsoffset = true;
-	_base = *nbase;
-	_offset = *noffset;
+	// _base = *nbase;
+	// _offset = *noffset;
 	// _value = 0; // Redundant, with base class
 	// _override = false; // Redundant, with base class
 	_link();
 }
 
 template<typename T_num_t>
-ModVal<T_num_t>::ModVal(const string& name) : OverrideableNumVal<T_num_t>(name) {
-	NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
-	NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
+ModVal<T_num_t>::ModVal(const string& name) : OverrideableNumVal<T_num_t>(name), _base(*new NumVal<T_num_t>(0)), _offset(*new NumVal<T_num_t>(0)) {
+	// NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
+	// NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
 	_ownsbase = true;
 	_ownsoffset = true;
-	_base = *nbase;
-	_offset = *noffset;
+	// _base = *nbase;
+	// _offset = *noffset;
 	// _value = 0; // Redundant, with base class
 	// _override = false; // Redundant, with base class
 	_link();
 }
 
 template<typename T_num_t>
-ModVal<T_num_t>::ModVal(const T_num_t& value) : OverrideableNumVal<T_num_t>(value) {
-	NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
-	NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
+ModVal<T_num_t>::ModVal(const T_num_t& value) : OverrideableNumVal<T_num_t>(value), _base(*new NumVal<T_num_t>(0)), _offset(*new NumVal<T_num_t>(0)) {
+	// NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
+	// NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
 	_ownsbase = true;
 	_ownsoffset = true;
-	_base = *nbase;
-	_offset = *noffset;
+	// _base = *nbase;
+	// _offset = *noffset;
 	// _value = value; // Redundant, with base class
 	// _override = true; // Redundant, with base class
 	_link();
 }
 
 template<typename T_num_t>
-ModVal<T_num_t>::ModVal(const string& name, const T_num_t& value) : OverrideableNumVal<T_num_t>(name, value) {
-	NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
-	NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
+ModVal<T_num_t>::ModVal(const string& name, const T_num_t& value) : OverrideableNumVal<T_num_t>(name, value), _base(*new NumVal<T_num_t>(0)), _offset(*new NumVal<T_num_t>(0)) {
+	// NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
+	// NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
 	_ownsbase = true;
 	_ownsoffset = true;
-	_base = *nbase;
-	_offset = *noffset;
+	// _base = *nbase;
+	// _offset = *noffset;
 	// _value = value; // Redundant, with base class
 	// _override = true; // Redundant, with base class
 	_link();
 }
 
 template<typename T_num_t>
-ModVal<T_num_t>::ModVal(NumVal<T_num_t>& base) : OverrideableNumVal<T_num_t>() {
+ModVal<T_num_t>::ModVal(NumVal<T_num_t>& base) : OverrideableNumVal<T_num_t>(), _offset(*new NumVal<T_num_t>(0)) {
 	// NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
-	NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
+	// NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
 	_ownsbase = false;
 	_ownsoffset = true;
 	_base = base;
-	_offset = *noffset;
+	// _offset = *noffset;
 	// _value = 0; // Redundant, with base class
 	// _override = false; // Redundant, with base class
 	_link();
 }
 
 template<typename T_num_t>
-ModVal<T_num_t>::ModVal(const string& name, NumVal<T_num_t>& base) : OverrideableNumVal<T_num_t>(name) {
+ModVal<T_num_t>::ModVal(const string& name, NumVal<T_num_t>& base) : OverrideableNumVal<T_num_t>(name), _offset(*new NumVal<T_num_t>(0)) {
 	// NumVal<T_num_t>* nbase = new NumVal<T_num_t>(0);
-	NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
+	// NumVal<T_num_t>* noffset = new NumVal<T_num_t>(0);
 	_ownsbase = false;
 	_ownsoffset = true;
 	_base = base;
-	_offset = *noffset;
+	// _offset = *noffset;
 	// _value = 0; // Redundant, with base class
 	// _override = false; // Redundant, with base class
 	_link();
@@ -173,20 +177,16 @@ ModVal<T_num_t>::~ModVal() {
 }
 
 template<typename T_num_t>
-AttrType ModVal<T_num_t>::attrType() const {
-	return P2E_ATTR_MODVAL;
-}
-
-template<typename T_num_t>
 string ModVal<T_num_t>::toString() const {
 	char buff[STRING_BUFFER_SIZE];
-	snprintf(buff, STRING_BUFFER_SIZE, "%g%c%g%c%g%c%d", value(), VALUE_DELIMITER, base(), VALUE_DELIMITER, offset(), VALUE_DELIMITER, this->overridden() ? 1 : 0);
+	snprintf(buff, STRING_BUFFER_SIZE, "%g%c%g%c%g%c%d", (double)(value()), MODVAL_VALUE_DELIMITER, 
+		(double)(base()), MODVAL_VALUE_DELIMITER, (double)(offset()), MODVAL_VALUE_DELIMITER, this->overridden() ? 1 : 0);
 	return string(buff);
 }
 
 template<typename T_num_t>
 T_num_t ModVal<T_num_t>::value() const {
-	return (this->overidden()) ? this->_value : base() + offset();
+	return ((this->overridden()) ? (this->_value) : (base() + offset()));
 }
 
 template<typename T_num_t>
@@ -217,7 +217,7 @@ bool ModVal<T_num_t>::validate(const string& newval) const {
 		values = _splitstring(newval);
 	}
 	catch (const Exception e) {
-		if (e.code() != P2EMON_ERR_INVALID_VALUE) throw e;
+		if (e.code() != ExceptionCode::INVALID_VALUE) throw e;
 		else return false;
 	}
 	if (values.size() <= 0) return false;
@@ -243,7 +243,7 @@ ModVal<T_num_t>& ModVal<T_num_t>::operator=(const ModVal<T_num_t>& rhs) {
 
 	base(rhs.base());
 	offset(rhs.offset());
-	value(rhs.value());
+	((OverrideableNumVal<T_num_t>*)(this))->value(rhs.value());
 	this->set_override(rhs.overridden());
 
 	this->update();
@@ -259,29 +259,15 @@ ModVal<T_num_t>& ModVal<T_num_t>::operator=(const ModVal<T_num_t>& rhs) {
 }
 
 template<typename T_num_t>
-Attribute& ModVal<T_num_t>::operator=(const Attribute& rhs) {
-	switch (rhs.attrType()) {
-	case P2E_ATTR_MODVAL:
-		// Implies a type conversion, but all numeric types must translate between themselves (pretty typical)
-		operator=((const ModVal<T_num_t>&)rhs);
-		break;
-	default:
-		// Call base class method otherwise
-		ModVal<T_num_t>::operator=(rhs);
-	}
-	return *this;
-}
-
-template<typename T_num_t>
 ModVal<T_num_t>& ModVal<T_num_t>::operator=(const string& newval) {
 	vector<T_num_t> values;
 	bool override_val = this->overridden();
 	values = _splitstring(newval);
 
-	if (values.size() <= 0) throw new Exception(P2EMON_ERR_INVALID_VALUE);
+	if (values.size() <= 0) throw new Exception(ExceptionCode::INVALID_VALUE);
 	switch (values.size()) {
 	case 0:
-		throw new Exception(P2EMON_ERR_INVALID_VALUE);
+		throw new Exception(ExceptionCode::INVALID_VALUE);
 	default: // > 4, don't really care about additional values
 	case 4: // Override = 0 (false) or != 0 (true)
 		override_val = (values[3] != 0); // Need to do this because setting value() may set _override = true
@@ -293,7 +279,7 @@ ModVal<T_num_t>& ModVal<T_num_t>::operator=(const string& newval) {
 		base(values[1]);
 	case 1: // Value
 		this->pause();
-		value(values[0]);
+		((OverrideableNumVal<T_num_t>*)(this))->value(values[0]);
 		this->set_override(override_val);
 		this->unpause();
 		this->update();
@@ -306,3 +292,4 @@ bool ModVal<T_num_t>::operator==(const ModVal& rhs) const {
 	return value() == rhs.value();
 }
 
+#endif

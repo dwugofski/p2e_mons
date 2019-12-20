@@ -29,28 +29,43 @@
     <ClCompile Include="..\..\src\p2em_updateable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_modval.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\p2em_numval.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\p2em_attribute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_aggval.cpp">
+    <ClCompile Include="..\..\src\p2em_strattr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_sumval.cpp">
+    <ClCompile Include="..\..\src\p2em_alignmentattr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_maxval.cpp">
+    <ClCompile Include="..\..\src\p2em_diceroll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_minval.cpp">
+    <ClCompile Include="..\..\src\p2em_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\p2em_transval.cpp">
+    <ClCompile Include="..\..\src\p2em_aggval.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_condmod.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_maxval.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_minval.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_modval.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_numval.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_sumval.hpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\p2em_transval.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

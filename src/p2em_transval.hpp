@@ -1,6 +1,9 @@
-#include "p2em_core.h"
+#pragma once
+#ifndef __P2EM_TRANSVAL_HPP__
+#define __P2EM_TRANSVAL_HPP__
 
-#define STRING_BUFFER_SIZE 100
+#include "p2em_core.h"
+#include "../src/p2em_numval.hpp"
 
 using namespace p2em_core;
 
@@ -83,3 +86,5 @@ void TransVal<T_num_t, T_src_t>::onupdate() {
 	if (this->paused()) return;
 	NumVal<T_num_t>::onupdate();
 }
+
+#endif
