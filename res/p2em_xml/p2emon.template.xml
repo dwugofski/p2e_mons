@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<root xmlns="https://github.com/dwugofski/p2e_mons" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="./pe2mon.xsd">
+<root xmlns="https://github.com/dwugofski/p2e_mons"><!--
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://github.com/dwugofski/p2e_mons p2emon.xsd">-->
 	<p2emon id="example_monster">
 		<name>Creature Name</name>
 		<level>-1</level>
@@ -50,6 +52,7 @@
 		<interactions>
 			<feat>
 				<name>Interaction Abilities</name>
+				<count>passive</count>
 				<description>Special abilities that affect how a creature perceives and interacts with the world are listed here.</description>
 			</feat>
 		</interactions>

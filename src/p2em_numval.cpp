@@ -20,7 +20,9 @@ NumVal::NumVal(const string& name, const double& baseval) : Attribute(name) {
 }
 
 NumVal::NumVal(const NumVal& source) {
-	NumVal(source.name(), source.value());
+	string nv_name = source.name();
+	double nv_val = source.value();
+	NumVal(nv_name, nv_val);
 }
 //
 //NumVal::NumVal(const Attribute& rhs) {
