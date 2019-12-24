@@ -23,6 +23,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\inc\p2em_xml\p2em_xml.cpp" />
+    <ClCompile Include="..\..\src\p2em_xml\p2em_xml_attribute.cpp" />
+    <ClCompile Include="..\..\src\p2em_xml\p2em_xml_document.cpp" />
+    <ClCompile Include="..\..\src\p2em_xml\p2em_xml_element.cpp" />
+    <ClCompile Include="..\..\src\p2em_xml\p2em_xml_exception.cpp" />
+    <ClCompile Include="..\..\src\p2em_xml\p2em_xml_node.cpp" />
+    <ClCompile Include="..\..\src\p2em_xml\p2em_xml_parser.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
