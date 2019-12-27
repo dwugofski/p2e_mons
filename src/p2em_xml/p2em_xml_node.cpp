@@ -6,6 +6,11 @@ using namespace p2em_xml;
 Node::Node(Document* doc, xerc::DOMNode* self) {
 	_node = self;
 	_srcdoc = doc;
+	_srcdoc->track_node(this);
+}
+
+Node::~Node() {
+	_srcdoc->untrack_node(this);
 }
 
 string Node::_xercread(const XMLCh* source) {
@@ -67,22 +72,22 @@ xerc::DOMNode* Node::_g_child(bool backwards, bool dofilter, Node::Type filter) 
 
 Node* Node::next_sibling() const {
 	xerc::DOMNode* ret = _g_sibling();
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 Node* Node::next_sibling(const Node::Type& filter) const {
 	xerc::DOMNode* ret = _g_sibling(false, true, filter);
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 Node* Node::prev_sibling() const {
 	xerc::DOMNode* ret = _g_sibling(true);
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 Node* Node::prev_sibling(const Node::Type& filter) const {
 	xerc::DOMNode* ret = _g_sibling(true, true, filter);
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 vector<Node*> Node::siblings() const {

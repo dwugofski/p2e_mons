@@ -3,15 +3,15 @@
 
 using namespace p2em_core;
 
-Attribute::Attribute() {
+Attribute::Attribute() : Updateable(), Traited() {
 	_name = "";
 }
 
-Attribute::Attribute(const string& name) {
+Attribute::Attribute(const string& name) : Updateable(), Traited() {
 	_name = name;
 }
 
-Attribute::Attribute(const Attribute& source) : Updateable(source) {
+Attribute::Attribute(const Attribute& source) : Updateable(source), Traited() {
 	_name = source.name();
 }
 

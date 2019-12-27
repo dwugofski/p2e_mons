@@ -1,6 +1,7 @@
 #include "p2em_core.hpp"
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
 
 #define ID_CREATE_TRYCOUNT_LIMIT	100
 
@@ -26,6 +27,13 @@ bool Core::has(uint id) const {
 
 bool Core::has(const Monster* mon) const {
 	return has(mon->id());
+}
+
+bool Core::has(const string& name) const {
+	for (umap<uint, Monster*>::const_iterator it = _monsters.begin(); it != _monsters.end(); it++) {
+		if ((*it).second->name() == name) return true;
+	}
+	return false;
 }
 
 uint Core::newid() const {
@@ -93,4 +101,30 @@ void Core::remove(Monster* mon) {
 void Core::remove(uint id) {
 	// If the monster is already in record, remove it. Otherwise do nothing
 	if (has(id)) remove(_monsters[id]);
+}
+
+ActionCount Core::actionCount(const string& source) {
+	string lower;
+	std::transform(source.begin(), source.end(), lower.begin(), std::tolower);
+	if (lower == "reaction") return ActionCount::REACTION;
+	else if (lower == "passive") return ActionCount::PASSIVE;
+	else if (lower == "free") return ActionCount::FREE;
+	else if (lower == "1" || lower == "single") return ActionCount::SINGLE;
+	else if (lower == "2" || lower == "double") return ActionCount::DOUBLE;
+	else if (lower == "3" || lower == "triple") return ActionCount::TRIPLE;
+	else throw new Exception(ExceptionCode::INVALID_VALUE, "Cannot parse '" + source + "' into an ActionCount!");
+}
+
+// --------------------------------------------------
+// Feat Class ---------------------------------------
+// --------------------------------------------------
+
+Feat::Feat() : Traited() {}
+Feat::Feat(const xml::Element* source) : Traited() { parse(source); }
+
+void Feat::parse(const xml::Element* source) {
+	name = source->first_element("name")->text();
+	description = source->first_element("description")->text();
+	action_count = Core::actionCount(source->first_element("count")->text());
+	((Traited*)(this))->parse(source);
 }

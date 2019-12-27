@@ -5,8 +5,8 @@ using namespace p2em_xml;
 
 Element::Element(Document* doc, xerc::DOMElement* self) : Node(doc, self) { _el = self; }
 
-string Element::value() const {
-	return _xercread(_el->getNodeValue());
+string Element::text() const {
+	return _xercread(_el->getTextContent());
 }
 
 string Element::tagname() const {
@@ -15,22 +15,22 @@ string Element::tagname() const {
 
 Node* Element::first_child() const {
 	xerc::DOMNode* ret = _g_child();
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 Node* Element::first_child(const Node::Type& filter) const {
 	xerc::DOMNode* ret = _g_child(false, true, filter);
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 Node* Element::last_child() const {
 	xerc::DOMNode* ret = _g_child(true);
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 Node* Element::last_child(const Node::Type& filter) const {
 	xerc::DOMNode* ret = _g_child(true, true, filter);
-	return (ret == nullptr) ? nullptr : new Node(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 vector<Node*> Element::children() const {
@@ -53,14 +53,45 @@ vector<Node*> Element::children(const Node::Type& filter) const {
 	return ret;
 }
 
+bool Element::has_element(const string& tagname) const {
+	XMLCh* tname = xerc::XMLString::transcode(tagname.c_str());
+	xerc::DOMNodeList* nodes = _el->getElementsByTagName(tname);
+	xerc::XMLString::release(&tname);
+	return nodes->getLength() > 0;
+}
+
 Element* Element::first_element() const {
 	xerc::DOMNode* ret = _g_child(false, true, Node::Type::ELEMENT);
-	return (ret == nullptr) ? nullptr : new Element(_srcdoc, (xerc::DOMElement*)(ret));
+	return (ret == nullptr) ? nullptr : _srcdoc->grab((xerc::DOMElement*)(ret));
+}
+
+Element* Element::first_element(const string& tagname) const {
+	vector<Element*> list = child_elements(tagname);
+	vector<Element*>::iterator it = list.begin();
+	Element* ret = *it;
+	// Should no longer be necessary as all nodes are handled through the document
+	// it++; // I know, I know. But I think this is clearer
+	// for (; it != list.end(); it++) {
+	// 	delete* it;
+	// }
+	return ret;
 }
 
 Element* Element::last_element() const {
 	xerc::DOMNode* ret = _g_child(true, true, Node::Type::ELEMENT);
-	return (ret == nullptr) ? nullptr : new Element(_srcdoc, (xerc::DOMElement*)(ret));
+	return (ret == nullptr) ? nullptr : _srcdoc->grab((xerc::DOMElement*)(ret));
+}
+
+Element* Element::last_element(const string& tagname) const {
+	vector<Element*> list = child_elements(tagname);
+	vector<Element*>::reverse_iterator it = list.rbegin(); // Doing it this way to make it more flexible with other iterable list types
+	Element* ret = *it;
+	// Should no longer be necessary as all nodes are handled through the document
+	// it++; // I know, I know. But I think this is clearer
+	// for (; it != list.rend(); it++) {
+	// 	delete *it;
+	// }
+	return ret;
 }
 
 vector<Element*> Element::child_elements() const {
@@ -73,14 +104,25 @@ vector<Element*> Element::child_elements() const {
 	return ret;
 }
 
+vector<Element*> Element::child_elements(const string& tagname) const {
+	vector<Element*> ret = vector<Element*>();
+	XMLCh* tname = xerc::XMLString::transcode(tagname.c_str());
+	xerc::DOMNodeList* nodes = _el->getElementsByTagName(tname);
+	xerc::XMLString::release(&tname);
+	for (XMLSize_t i = 0; i < nodes->getLength(); i += 1) {
+		ret.push_back(_srcdoc->grab((xerc::DOMElement*)(nodes->item(i))));
+	}
+	return ret;
+}
+
 Element* Element::next_element() const {
 	xerc::DOMNode* ret = _g_sibling(false, true, Node::Type::ELEMENT);
-	return (ret == nullptr) ? nullptr : new Element(_srcdoc, (xerc::DOMElement*)(ret));
+	return (ret == nullptr) ? nullptr : _srcdoc->grab((xerc::DOMElement*)(ret));
 }
 
 Element* Element::prev_element() const {
 	xerc::DOMNode* ret = _g_sibling(true, true, Node::Type::ELEMENT);
-	return (ret == nullptr) ? nullptr : new Element(_srcdoc, (xerc::DOMElement*)(ret));
+	return (ret == nullptr) ? nullptr : _srcdoc->grab((xerc::DOMElement*)(ret));
 }
 
 vector<Element*> Element::sibling_elements() const {
@@ -118,6 +160,6 @@ Attribute* Element::attr(const string& attrname) const {
 	XMLCh* xstr = xerc::XMLString::transcode(attrname.c_str());
 	xerc::DOMAttr* ret = _el->getAttributeNode(xstr);
 	xerc::XMLString::release(&xstr);
-	return (ret == nullptr) ? nullptr : new Attribute(_srcdoc, (xerc::DOMAttr*)(ret));
+	return (ret == nullptr) ? nullptr : _srcdoc->grab((xerc::DOMAttr*)(ret));
 }
 

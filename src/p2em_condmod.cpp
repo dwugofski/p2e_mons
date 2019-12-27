@@ -20,7 +20,13 @@ CondModOpt::CondModOpt(const string& desc, const bool& sel) : CondModOpt(0, desc
 CondModOpt::CondModOpt(const CondModOpt& source) : CondModOpt(source.value(), source.description, source.selected) {  }
 
 CondModOpt& CondModOpt::operator=(const string& rhs) {
-	description = rhs;
+	string::size_type idx;
+	bool val = std::stod(rhs, &idx);
+	if (idx != 0) {
+		value(val);
+		idx += 1; // For the trailing space... maybe we should specifically remove it if it is a space?
+	}
+	description = rhs.substr(idx);
 	return *this;
 }
 
@@ -42,7 +48,11 @@ bool CondModOpt::operator==(const CondModOpt& rhs) const {
 	return ((this->_value == rhs.value()) && (description == rhs.description));
 }
 
-CondModOpt::operator string() const { return description; }
+CondModOpt::operator string() const {
+	char buffer[STRING_BUFFER_SIZE];
+	snprintf(&buffer[0], STRING_BUFFER_SIZE, "%#d ", value());
+	return buffer + description;
+}
 CondModOpt::operator bool() const { return selected; }
 
 // ----------------------------------------
@@ -68,6 +78,11 @@ CondMod::CondMod(const double& val) : ModVal(val) { _init(); }
 CondMod::CondMod(const string& name, const double& val) : ModVal(name, val) { _init(); }
 CondMod::CondMod(NumVal& base, const double& val) : ModVal(base, val) { _init(); }
 CondMod::CondMod(const string& name, NumVal& base, const double& val) : ModVal(name, base, val) { _init(); }
+
+CondMod::CondMod(const xml::Element* source) : ModVal( /* source */) {
+	_init();
+	parse(source);
+}
 
 CondMod::CondMod(const CondMod& source) : ModVal(source) {
 	_init();
@@ -168,4 +183,17 @@ const CondModOpt& CondMod::operator[](const int& index) const {
 
 CondModOpt& CondMod::operator[](const int& index) {
 	return const_cast<CondModOpt&>(static_cast<const CondMod*>(this)->operator[](index));
+}
+
+void CondMod::parse(const xml::Element* source) {
+	if (source->has_element("name")) name(source->first_element("name")->text());
+	base(std::stod(source->first_element("base")->text()));
+	CondModOpt* newcmodo;
+	vector<xml::Element*> modifiers = source->child_elements("modifier");
+	for (vector<xml::Element*>::iterator it = modifiers.begin(); it != modifiers.end(); it++) {
+		newcmodo = new CondModOpt();
+		*newcmodo = (*it)->text();
+		addOption(*newcmodo, true);
+	}
+	((Traited*)(this))->parse(source);
 }

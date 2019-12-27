@@ -97,8 +97,9 @@ ErrorHandler::ErrorHandler(std::ostream& out, const string& prelude, const Error
 	_mode = mode;
 }
 
-void ErrorHandler::_message(const xerc::SAXParseException& err, const string& level) {
+string ErrorHandler::_message(const xerc::SAXParseException& err, const string& level) {
 	char* msg = xerc::XMLString::transcode(err.getMessage());
+	string ret = "";
 	time_t rawtime;
 	tm timeinfo;
 	char buffer[80];
@@ -109,23 +110,30 @@ void ErrorHandler::_message(const xerc::SAXParseException& err, const string& le
 	strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", &timeinfo);
 	std::string tstr(buffer);
 
-	*_out << tstr << " : ";
-	*_out << _prelude << " : (" << err.getLineNumber() << ", " << err.getColumnNumber() << ")\t";
-	*_out << level << "\n" << msg << "\n";
+	ret += tstr + " : ";
+	ret += _prelude + " : (";
+	snprintf(&buffer[0], 80, "%d", err.getLineNumber());
+	ret += buffer;
+	ret += ", ";
+	snprintf(&buffer[0], 80, "%d", err.getColumnNumber());
+	ret += ")\t";
+	ret += level + "\n" + msg + "\n";
 	xerc::XMLString::release(&msg);
+	return ret;
 }
 
 void ErrorHandler::warning(const xerc::SAXParseException& err) {
-	_message(err, "Warning!");
+	*_out << _message(err, "Warning!");
 }
 
 void ErrorHandler::error(const xerc::SAXParseException& err) {
-	_message(err, "~~ERROR!!!~~");
+	*_out << _message(err, "~~ERROR!!!~~");
 	_errcount += 1;
 }
 
 void ErrorHandler::fatalError(const xerc::SAXParseException& err) {
-	_message(err, "~~FATAL ERROR!!!~~");
+	string rep = _message(err, "~~FATAL ERROR!!!~~");
+	*_out << rep;
 	_errcount += 1;
 	Exception::Code errcode;
 	switch (_mode) {
@@ -139,7 +147,7 @@ void ErrorHandler::fatalError(const xerc::SAXParseException& err) {
 		errcode = Exception::Code::ERROR;
 	}
 	char* msg = xerc::XMLString::transcode(err.getMessage());
-	string errmsg = msg;
+	string errmsg = rep + msg;
 	xerc::XMLString::release(&msg);
 	throw new Exception(errcode, errmsg);
 }

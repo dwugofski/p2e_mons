@@ -136,7 +136,7 @@
 	<xs:group name="quantityGroup">
 		<xs:sequence>
 			<xs:element name="base" type="xs:integer"/>
-			<xs:element name="modifier" minOccurs="0" type="xs:token"/>
+			<xs:element name="modifier" minOccurs="0" maxOccurs="unbounded" type="xs:token"/>
 			<xs:element name="traits" minOccurs="0" type="traitList"/>
 		</xs:sequence>
 	</xs:group>
@@ -438,7 +438,13 @@
 							<xs:element name="rarity" type="rarityLevel"/>
 							<xs:element name="alignment" type="alignmentString"/>
 							<xs:element name="size" type="sizeString"/>
-							<xs:element name="type" type="lower"/>
+							<xs:element name="types">
+								<xs:complexType>
+									<xs:choice minOccurs="1" maxOccurs="unbounded">
+										<xs:element name="type" type="xs:token" />
+									</xs:choice>
+								</xs:complexType>
+							</xs:element>
 							<xs:element name="traits" type="traitList"/>
 							<xs:element name="perception" type="quantityType"/>
 							<xs:element name="languages">
@@ -527,7 +533,6 @@
 										<xs:element name="units" type="lower"/>
 										<xs:element name="speed" type="specialSpeeds" minOccurs="0" maxOccurs="unbounded"/>
 									</xs:sequence>
-									<xs:attribute name="units" type="lower"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="actions">

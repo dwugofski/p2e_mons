@@ -14,9 +14,13 @@
 #include <exception>
 #include <tuple>
 
+#include "p2em_xml/p2em_xml.hpp"
+
 #define STRING_BUFFER_SIZE 256
 
 namespace p2em_core {
+
+	namespace xml = p2em_xml;
 
 	using string = std::string;
 	template<typename T_unit_t> using vector = std::vector<T_unit_t>;
@@ -50,6 +54,7 @@ namespace p2em_core {
 		CIRCULAR_DEPS,
 		INVALID_VALUE,
 		INVALID_DICE_STRING,
+		TEMPLATE_READ_ERROR,
 
 		ERROR
 	};
@@ -65,6 +70,7 @@ namespace p2em_core {
 		"Could not add dependency: Dependency lists must not be circular!",
 		"Cannot set attribute to provided value!",
 		"Roll specification string does not match proper format!",
+		"Error reading monster template",
 
 		"Monster error!"
 	};
@@ -124,11 +130,13 @@ namespace p2em_core {
 	class Exception;
 	class Attribute;
 	class Updateable;
-	class Monster;
+	class Traited;
 	class Object;
+	class Monster;
 
 	struct Registry {
 		virtual bool has(uint id) const = 0;
+		virtual bool has(const string& name) const = 0;
 		virtual uint newid() const = 0;
 	};
 
@@ -139,6 +147,7 @@ namespace p2em_core {
 		Core();
 
 		bool has(uint id) const override;
+		virtual bool has(const string& name) const override;
 		uint newid() const override;
 		bool has(const Monster* monster) const;
 		const Monster* get(uint id) const;
@@ -150,6 +159,8 @@ namespace p2em_core {
 
 		const Monster* operator[](uint id) const;
 		Monster* operator[](uint id);
+
+		static ActionCount actionCount(const string& source);
 	};
 
 	class Exception : public std::exception {
@@ -194,7 +205,7 @@ namespace p2em_core {
 		virtual void onupdate();
 	};
 
-	class Attribute : public Updateable {
+	class Attribute : public Updateable, public Traited {
 	protected:
 		string _name;
 	public:
@@ -513,6 +524,7 @@ namespace p2em_core {
 		CondMod(const string& name, const double& value);
 		CondMod(NumVal& base, const double& value);
 		CondMod(const string& name, NumVal& base, const double& value);
+		CondMod(const xml::Element* source);
 		CondMod(const CondMod& source);
 		~CondMod();
 
@@ -537,6 +549,8 @@ namespace p2em_core {
 		
 		virtual const CondModOpt& operator[](const int& index) const;
 		virtual CondModOpt& operator[](const int& index);
+
+		void parse(const xml::Element* source);
 	};
 
 	class Traited {
@@ -550,13 +564,21 @@ namespace p2em_core {
 		bool hasTrait(const string& tagnam) const;
 		void addTrait(const string& newtag);
 		void removeTrait(const string& oldtag);
+
+		void parse(const xml::Element* source);
 	};
 
+	// Located in p2em_core.cpp
 	class Feat : public Traited {
 	public:
 		string name;
 		ActionCount action_count;
 		string description;
+
+		Feat();
+		Feat(const xml::Element* source);
+
+		void parse(const xml::Element* source);
 	};
 
 	class DiceRoll {
@@ -610,6 +632,11 @@ namespace p2em_core {
 		int modifier;
 		vector<DamageSpec> damages;
 		vector<string> effects;
+
+		Action();
+		Action(const xml::Element* source);
+
+		void parse(const xml::Element* source);
 	};
 
 	struct SpellLevelSummary {
@@ -617,6 +644,11 @@ namespace p2em_core {
 		int heightening;
 		int slotcount;
 		vector<string> spells;
+
+		SpellLevelSummary();
+		SpellLevelSummary(const xml::Element* source);
+
+		void parse(const xml::Element* source);
 	};
 
 	struct SpellList {
@@ -626,6 +658,11 @@ namespace p2em_core {
 		int attack;
 		bool has_attack;
 		vector<SpellLevelSummary> levels;
+
+		SpellList();
+		SpellList(const xml::Element* source);
+
+		void parse(const xml::Element* source);
 	};
 
 	class Object : public Traited, public Updateable {
@@ -710,6 +747,7 @@ namespace p2em_core {
 		CondMod fortitude;
 		CondMod reflex;
 		CondMod will;
+		vector<CondModOpt> saves;
 		CondMod maxhp;
 		NumVal temphp;
 		NumVal damage;
@@ -717,6 +755,7 @@ namespace p2em_core {
 		vector<CondMod> weaknesses;
 		vector<CondMod> resistances;
 		vector<Feat> offturn_feats;
+		string speed_units;
 		vector<CondMod> speeds;
 		vector<Action> actions;
 		vector<SpellList> spelllists;
@@ -730,12 +769,15 @@ namespace p2em_core {
 		Monster(Core& core, const vector<string>& tags, const string& name);
 		Monster(Core& core, const vector<string>& tags, const uint& id);
 		Monster(Core& core, const vector<string>& tags, const uint& id, const string& name);
+		Monster(Core& core, const xml::Element* templ);
 		Monster(const Monster& source);
 
 		Core& core() const;
 		Registry& reg() const override;
 
 		int hp() const;
+
+		void parse(const xml::Element* templ);
 	};
 }
 

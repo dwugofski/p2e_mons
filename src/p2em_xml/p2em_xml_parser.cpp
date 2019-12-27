@@ -4,6 +4,24 @@
 
 using namespace p2em_xml;
 
+// ---------------------------------------------
+// Global Functions ----------------------------
+// ---------------------------------------------
+
+// template<typename T_ret_t> // Consider making this more generic...
+vector<string> p2em_xml::node2strvec(const Element* src, const string& tagname) {
+	vector<string> ret = vector<string>();
+	vector<Element*> children = src->child_elements(tagname);
+	for (vector<Element*>::iterator it = children.begin(); it != children.end(); it++) {
+		ret.push_back((*it)->text()); // If we add operator string(const Element* source), we can get this to work generically for the string via T_ret_t((*it))
+	}
+	return ret; // The concern is getting classes which can use this vector easily (i.e. issues with copy constructors)
+}
+
+// ---------------------------------------------
+// Parser Class --------------------------------
+// ---------------------------------------------
+
 static bool _exists(const string& filename) {
 	FILE* file;
 	if (fopen_s(&file, filename.c_str(), "r") == 0) {

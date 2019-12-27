@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 
 namespace p2em_xml {
 	namespace xerc = xercesc;
@@ -18,6 +19,7 @@ namespace p2em_xml {
 	using Library = xerc::XMLPlatformUtils;
 	using string = std::string;
 	template<typename T_vec_t> using vector = std::vector<T_vec_t>;
+	template<typename T_key_t, typename T_val_t> using umap = std::unordered_map<T_key_t, T_val_t>;
 
 	class Exception;
 	class ErrorHandler;
@@ -27,6 +29,8 @@ namespace p2em_xml {
 	class Element;
 	class Document;
 
+	// template<typename T_ret_t> // Consider making this more generic...
+	vector<string> node2strvec(const Element* srcnode, const string& tagname);
 
 	class Exception {
 	public:
@@ -68,7 +72,7 @@ namespace p2em_xml {
 		Mode _mode;
 		std::ostream* _out;
 
-		void _message(const xerc::SAXParseException& err, const string& level);
+		string _message(const xerc::SAXParseException& err, const string& level);
 
 	public:
 		static const string ERROR_LOG_FILE;
@@ -139,7 +143,7 @@ namespace p2em_xml {
 
 	public:
 		Node(Document* doc, xerc::DOMNode* self);
-		// ~Node(); // Do not release the pointer, in case it is being used elsewhere
+		~Node(); // Do not release the xerces pointer, in case it is being used elsewhere
 
 		// static Node* nodeFactory(Parser* source);
 
@@ -194,7 +198,7 @@ namespace p2em_xml {
 		Element(Document* doc, xerc::DOMElement* self);
 		// ~Element();
 
-		string value() const;
+		string text() const;
 		string tagname() const;
 
 		// Functions to get children nodes
@@ -204,9 +208,13 @@ namespace p2em_xml {
 		Node* last_child(const Type& filter) const;
 		vector<Node*> children() const;
 		vector<Node*> children(const Type& filter) const;
+		bool has_element(const string& tagname) const;
 		Element* first_element() const;
+		Element* first_element(const string& tagname) const;
 		Element* last_element() const;
+		Element* last_element(const string& tagname) const;
 		vector<Element*> child_elements() const;
+		vector<Element*> child_elements(const string& tagname) const;
 
 		// Functions to get sibling elements
 		Element* next_element() const;
@@ -229,10 +237,18 @@ namespace p2em_xml {
 	class Document : public Element {
 	private:
 		xerc::DOMDocument* _doc;
+		umap<xerc::DOMNode*, Node*> _nodes;
 
 	public:
 		Document(xerc::DOMDocument* self);
 		~Document(); // Do release
+
+		void track_node(Node* newnode);
+		void untrack_node(const Node* oldnode);
+
+		Node* grab(xerc::DOMNode* ptr);
+		Attribute* grab(xerc::DOMAttr* ptr);
+		Element* grab(xerc::DOMElement* ptr);
 	};
 }
 

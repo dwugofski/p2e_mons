@@ -18,17 +18,17 @@ void Attribute::value(const string& newval) {
 
 Element* Attribute::el() const {
 	xerc::DOMElement* ret = _attr->getOwnerElement();
-	return (ret == nullptr) ? nullptr : new Element(_srcdoc, ret);
+	return (ret == nullptr) ? nullptr : _srcdoc->grab(ret);
 }
 
 Attribute* Attribute::next_attr() const {
 	xerc::DOMNode* ret = _g_sibling(false, true, Node::Type::ATTRIBUTE);
-	return (ret == nullptr) ? nullptr : new Attribute(_srcdoc, (xerc::DOMAttr*)(ret));
+	return (ret == nullptr) ? nullptr : _srcdoc->grab((xerc::DOMAttr*)(ret));
 }
 
 Attribute* Attribute::prev_attr() const {
 	xerc::DOMNode* ret = _g_sibling(true, true, Node::Type::ATTRIBUTE);
-	return (ret == nullptr) ? nullptr : new Attribute(_srcdoc, (xerc::DOMAttr*)(ret));
+	return (ret == nullptr) ? nullptr : _srcdoc->grab((xerc::DOMAttr*)(ret));
 }
 
 vector<Attribute*> Attribute::sibling_attrs() const {

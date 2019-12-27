@@ -1,6 +1,9 @@
 #include "p2em_core.hpp"
 #include <algorithm>
 
+#define P2EM_XML_TRAITLIST_TAGNAME "traits"
+#define P2EM_XML_TRAIT_TAGNAME "trait"
+
 using namespace p2em_core;
 
 // --------------------------------------------------
@@ -44,6 +47,14 @@ void Traited::removeTrait(const string& Ctrait) {
 			_traits.erase(it);
 			break;
 		}
+	}
+}
+
+void Traited::parse(const xml::Element* source) {
+	if (!source->has_element(P2EM_XML_TRAITLIST_TAGNAME)) return; // If there is no traitlist, don't panic
+	vector<xml::Element*> traits = source->first_element(P2EM_XML_TRAITLIST_TAGNAME)->child_elements(P2EM_XML_TRAIT_TAGNAME);
+	for (vector<xml::Element*>::iterator it = traits.begin(); it != traits.end(); it++) {
+		addTrait((*it)->text());
 	}
 }
 
