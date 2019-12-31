@@ -20,9 +20,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\inc\p2em_xml\p2em_xml.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\p2em_xml\p2em_xml_exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
