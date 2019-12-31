@@ -398,12 +398,13 @@
 		<xs:sequence>
 			<xs:element name="name" type="xs:token"/>
 			<xs:element name="slots" type="spellSlotCount" minOccurs="0"/>
+			<xs:element name="comment" type="token" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 
 	<xs:complexType name="spellLevelGroup">
 		<xs:sequence>
-			<xs:element name="level" type="spellLevel" minOccurs="0"/>
+			<xs:element name="level" type="spellLevel"/>
 			<xs:element name="height" minOccurs="0">
 				<xs:simpleType>
 					<xs:restriction base="xs:positiveInteger">

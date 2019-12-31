@@ -163,6 +163,7 @@ namespace p2em_core {
 		static ActionCount actionCount(const string& source);
 	};
 
+	// Located in p2em_core.cpp
 	class Exception : public std::exception {
 	private:
 		string _msg;
@@ -571,6 +572,11 @@ namespace p2em_core {
 	// Located in p2em_core.cpp
 	class Feat : public Traited {
 	public:
+		static const string TAGNAME;
+		static const string NAME_TAGNAME;
+		static const string COUNT_TAGNAME;
+		static const string DESCRIPTION_TAGNAME;
+
 		string name;
 		ActionCount action_count;
 		string description;
@@ -620,11 +626,22 @@ namespace p2em_core {
 		DiceRoll& operator+=(const string& specification);
 	};
 
+	// Located in p2em_core.cpp
 	struct DamageSpec {
 		string type;
 		DiceRoll roll;
+
+		static const string TAGNAME;
+		static const string DAMAGE_TYPE_TAGNAME;
+		static const string DAMAGE_DICE_TAGNAME;
+
+		DamageSpec();
+		DamageSpec(const xml::Element* source);
+
+		void parse(const xml::Element* source);
 	};
 
+	// Located in p2em_core.cpp
 	struct Action : public Traited {
 		string name;
 		string type;
@@ -633,17 +650,60 @@ namespace p2em_core {
 		vector<DamageSpec> damages;
 		vector<string> effects;
 
+		static const string TAGNAME;
+		static const string ACTION_TYPE_TAGNAME;
+		static const string ACTION_COUNT_TAGNAME;
+		static const string ACTION_NAME_TAGNAME;
+		static const string ACTION_MODIFIER_TAGNAME;
+		static const string ACTION_RESULTS_TAGNAME;
+		static const string ACTION_RESULTS_EFFECT_TAGNAME;
+
 		Action();
 		Action(const xml::Element* source);
 
 		void parse(const xml::Element* source);
 	};
 
+	// Located in p2em_core.cpp
+	struct SpellDesc {
+		string name;
+		string comment;
+		int slotcount;
+
+		static const string TAGNAME;
+		static const string NAME_TAGNAME;
+		static const string COMMENT_TAGNAME;
+		static const string SLOTS_TAGNAME;
+		static const string COUNT_AT_WILL;
+		static const string COMMENT_NULL;
+		static const int ICOUNT_AT_WILL;
+		static const int ICOUNT_NULL;
+
+		SpellDesc();
+		SpellDesc(const xml::Element* source);
+
+		void parse(const xml::Element* source);
+	};
+
+	// Located in p2em_core.cpp
 	struct SpellLevelSummary {
 		int level;
 		int heightening;
 		int slotcount;
-		vector<string> spells;
+		vector<SpellDesc> spells;
+
+		static const string TAGNAME;
+		static const string LEVEL_TAGNAME;
+		static const string HEIGHTENING_TAGNAME;
+		static const string SLOTS_TAGNAME;
+		static const string LEVEL_CANTRIP;
+		static const string LEVEL_CONTINU;
+		static const string COUNT_AT_WILL;
+		static const int ILEVEL_CANTRIP;
+		static const int ILEVEL_CONTINU;
+		static const int IHEIGHT_NULL;
+		static const int ICOUNT_AT_WILL;
+		static const int ICOUNT_NULL;
 
 		SpellLevelSummary();
 		SpellLevelSummary(const xml::Element* source);
@@ -651,13 +711,26 @@ namespace p2em_core {
 		void parse(const xml::Element* source);
 	};
 
+	// Located in p2em_core.cpp
 	struct SpellList {
 		SpellTradition tradition;
 		SpellCastingType type;
 		int difficulty;
-		int attack;
+		CondMod attack;
 		bool has_attack;
 		vector<SpellLevelSummary> levels;
+
+		static const string TAGNAME;
+		static const string TRADITION_TAGNAME;
+		static const string TYPE_TAGNAME;
+		static const string DC_TAGNAME;
+		static const string ATK_TAGNAME;
+		static const int IATK_NULL;
+
+		static SpellTradition s2trad(const string& strad);
+		static string trad2s(const SpellTradition& trad);
+		static SpellCastingType s2type(const string& stype);
+		static string type2s(const SpellCastingType& sctype);
 
 		SpellList();
 		SpellList(const xml::Element* source);
@@ -730,6 +803,46 @@ namespace p2em_core {
 	protected:
 		Core* _core;
 	public:
+		static const string TAGNAME;
+		static const string NAME_TAGNAME;
+		static const string LEVEL_TAGNAME;
+		static const string RARITY_TAGNAME;
+		static const string ALIGNMENT_TAGNAME;
+		static const string SIZE_TAGNAME;
+		static const string TYPES_TAGNAME;
+		static const string PERCEPTION_TAGNAME;
+		static const string LANGUAGES_TAGNAME;
+		static const string LANGUAGES_LANG_TAGNAME;
+		static const string SKILLS_TAGNAME;
+		static const string SKILLS_SKILL_TAGNAME;
+		static const string ABILITIES_TAGNAME;
+		static const string STRENGTH_TAGNAME;
+		static const string DEXTERITY_TAGNAME;
+		static const string CONSTITUTION_TAGNAME;
+		static const string INTELLIGENCE_TAGNAME;
+		static const string WISDOM_TAGNAME;
+		static const string CHARISMA_TAGNAME;
+		static const string ITEMS_TAGNAME;
+		static const string ITEMS_ITEM_TAGNAME;
+		static const string INTERACTIONS_TAGNAME;
+		static const string ARMOR_TAGNAME;
+		static const string SAVES_TAGNAME;
+		static const string SAVES_FORT_TAGNAME;
+		static const string SAVES_REFL_TAGNAME;
+		static const string SAVES_WILL_TAGNAME;
+		static const string SAVES_MOD_TAGNAME;
+		static const string HITPOINTS_TAGNAME;
+		static const string IMMUNITIES_TAGNAME;
+		static const string IMMUNITIES_IMM_TAGNAME;
+		static const string WEAKNESSES_TAGNAME;
+		static const string WEAKNESSES_WEAK_TAGNAME;
+		static const string RESISTANCES_TAGNAME;
+		static const string RESISTANCES_RES_TAGNAME;
+		static const string OFFTURN_TAGNAME;
+		static const string SPEEDS_TAGNAME;
+		static const string SPEEDS_UNIT_TAGNAME;
+		static const string SPEEDS_SPEED_TAGNAME;
+
 		NumVal level;
 		AlignmentAttr alignment;
 		CondMod perception;
