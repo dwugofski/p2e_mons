@@ -60,6 +60,9 @@
     <ClCompile Include="..\..\src\p2em_sumval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\p2em.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\p2em_core.hpp">
