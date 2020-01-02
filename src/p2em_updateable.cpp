@@ -20,22 +20,22 @@ Updateable::Updateable(const Updateable& source) {
 }
 
 Updateable::~Updateable() {
-	vector<Updateable*>::iterator ot;
 	vector<Updateable*>::iterator it = _parents.begin();
+	Updateable* oldptr;
 
 	while (it != _parents.end()) {
-		ot = it++;
-		_parents.erase(ot);
+		oldptr = *it;
+		it = _parents.erase(it);
 
-		(*ot)->removeDependency(*this);
+		oldptr->removeDependency(*this);
 	}
 
 	it = _dependencies.begin();
 	while (it != _dependencies.end()) {
-		ot = it++;
-		_dependencies.erase(ot);
+		oldptr = *it;
+		it = _dependencies.erase(it);
 		
-		(*ot)->removeParent(*this);
+		oldptr->removeParent(*this);
 	}
 }
 
@@ -79,7 +79,7 @@ void Updateable::removeDependency(Updateable& dep) {
 	while (it != _dependencies.end()) {
 		ot = it++;
 		if ((*ot) != &dep) continue;
-		_dependencies.erase(ot);
+		it = _dependencies.erase(ot);
 	}
 	dep.removeParent(*this);
 }
@@ -105,7 +105,7 @@ void Updateable::removeParent(Updateable& parent) {
 	while (it != _parents.end()) {
 		ot = it++;
 		if ((*ot) != &parent) continue;
-		_parents.erase(ot);
+		it = _parents.erase(ot);
 	}
 	parent.removeDependency(*this);
 }
@@ -130,7 +130,7 @@ void Updateable::removeCallback(const Updateable* src, void (*callback)(Updateab
 	while (it != _callbacks.end()) {
 		ot = it++;
 		if ((callback != std::get<1>(*ot)) || (src != std::get<0>(*ot))) continue;
-		_callbacks.erase(ot);
+		it = _callbacks.erase(ot);
 	}
 }
 

@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\p2em_core.hpp" />
+    <ClInclude Include="..\..\inc\p2em_macros.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\p2em.cpp" />

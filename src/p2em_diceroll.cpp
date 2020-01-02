@@ -78,7 +78,7 @@ static std::tuple<vector<Die>, vector<int>, int> _storoll(const string& specific
 	vector<int> counts = vector<int>();
 	int temp = 0, index = 0, sign = 1;
 	string::size_type sz;
-	string spec;
+	string spec = specification;
 	std::transform(specification.begin(), specification.end(), spec.begin(), std::tolower);
 	try {
 		while (index < spec.size()) {
@@ -108,6 +108,7 @@ static std::tuple<vector<Die>, vector<int>, int> _storoll(const string& specific
 				modifier += (temp * sign);
 				spec = spec.substr(sz);
 			}
+			index += sz;
 		}
 	}
 	catch (std::exception & ex) {

@@ -20,11 +20,17 @@ CondModOpt::CondModOpt(const string& desc, const bool& sel) : CondModOpt(0, desc
 CondModOpt::CondModOpt(const CondModOpt& source) : CondModOpt(source.value(), source.description, source.selected) {  }
 
 CondModOpt& CondModOpt::operator=(const string& rhs) {
-	string::size_type idx;
-	bool val = std::stod(rhs, &idx);
+	string::size_type idx = 0;
+	double val = 0;
+	try {
+		 val = std::stod(rhs, &idx);
+	}
+	catch (const std::invalid_argument & ia) {
+		val = std::nan("");
+	}
 	if (idx != 0) {
 		value(val);
-		idx += 1; // For the trailing space... maybe we should specifically remove it if it is a space?
+		while (rhs[idx] == ' ' && idx < rhs.size()) idx += 1; // For the trailing space... maybe we should have more robust white-space detection?
 	}
 	description = rhs.substr(idx);
 	return *this;
@@ -50,7 +56,7 @@ bool CondModOpt::operator==(const CondModOpt& rhs) const {
 
 CondModOpt::operator string() const {
 	char buffer[STRING_BUFFER_SIZE];
-	snprintf(&buffer[0], STRING_BUFFER_SIZE, "%#d ", value());
+	snprintf(&buffer[0], STRING_BUFFER_SIZE, "%#d ", (int)(value()));
 	return buffer + description;
 }
 CondModOpt::operator bool() const { return selected; }
@@ -62,11 +68,12 @@ CondModOpt::operator bool() const { return selected; }
 void CondMod::_init() {
 	_options = vector<CondModOpt*>();
 	_ownership = vector<bool>();
-	this->removeParent(this->_offset);
-	delete &(this->_offset);
+	this->removeParent(*(this->_offset));
+	_assertm(this->_ownsoffset, "CondMod does not own its own offset!");
+	delete this->_offset;
 	this->_ownsoffset = false;
 	_agger = SumVal();
-	this->_offset = _agger;
+	this->_offset = &_agger;
 	this->addParent(_agger);
 }
 

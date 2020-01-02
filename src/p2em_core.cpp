@@ -79,15 +79,16 @@ void Core::add(Monster* mon) {
 	if (has(mon->id())) {
 		// If the monster is already in the record, do nothing; otherwise raise an exception
 		if (_monsters[mon->id()] == mon) return;
-		else throw Exception(ExceptionCode::DUPLICATE_MONSTER);
+		else throw new Exception(ExceptionCode::DUPLICATE_MONSTER);
 	}
 	else {
 		// Add the new monster
 		_monsters.insert({ mon->id(), mon });
+		return;
 	}
 
 	// Should not reach this
-	throw Exception(ExceptionCode::ERROR);
+	throw new Exception(ExceptionCode::ERROR);
 }
 
 void Core::remove(Monster* mon) {
@@ -95,7 +96,7 @@ void Core::remove(Monster* mon) {
 	if (has(mon->id())) {
 		// If the monster matches the record, remove it; otherwise raise an exception
 		if (_monsters[mon->id()] == mon) _monsters.erase(mon->id());
-		else throw Exception(ExceptionCode::MONSTER_MISMATCH);
+		else throw new Exception(ExceptionCode::MONSTER_MISMATCH);
 	}
 	else {
 		// If the monster is not in the record, do nothing
@@ -103,7 +104,7 @@ void Core::remove(Monster* mon) {
 	}
 
 	// Should not reach this
-	throw Exception(ExceptionCode::ERROR);
+	throw new Exception(ExceptionCode::ERROR);
 }
 
 void Core::remove(uint id) {
@@ -112,7 +113,7 @@ void Core::remove(uint id) {
 }
 
 ActionCount Core::actionCount(const string& source) {
-	string lower;
+	string lower = source;
 	std::transform(source.begin(), source.end(), lower.begin(), std::tolower);
 	if (lower == "reaction") return ActionCount::REACTION;
 	else if (lower == "passive") return ActionCount::PASSIVE;
@@ -124,7 +125,7 @@ ActionCount Core::actionCount(const string& source) {
 }
 
 CreatureSize Core::creatureSize(const string& source) {
-	string lower;
+	string lower = source;
 	std::transform(source.begin(), source.end(), lower.begin(), std::tolower);
 	if (lower == "tiny") return CreatureSize::TINY;
 	else if (lower == "small") return CreatureSize::SMALL;
@@ -144,7 +145,7 @@ const string Feat::NAME_TAGNAME = "name";
 const string Feat::COUNT_TAGNAME = "count";
 const string Feat::DESCRIPTION_TAGNAME = "description";
 
-Feat::Feat() : Traited() {}
+Feat::Feat() : Traited(), action_count(ActionCount::PASSIVE) {}
 Feat::Feat(const xml::Element* source) : Traited() { parse(source); }
 
 void Feat::parse(const xml::Element* source) {
@@ -227,7 +228,7 @@ const string SpellDesc::COMMENT_NULL = "__NULL__";
 const int SpellDesc::ICOUNT_AT_WILL = -1;
 const int SpellDesc::ICOUNT_NULL = -2;
 
-SpellDesc::SpellDesc() {  }
+SpellDesc::SpellDesc() { slotcount = SpellDesc::ICOUNT_NULL; }
 SpellDesc::SpellDesc(const xml::Element* source) { parse(source); }
 
 void SpellDesc::parse(const xml::Element* source) {
@@ -248,10 +249,12 @@ void SpellDesc::parse(const xml::Element* source) {
 				slotcount = tmpcount;
 			}
 			catch (const std::out_of_range & oor) {
+				(void)oor; // Suppress compiler warning
 				throw new Exception(ExceptionCode::INVALID_VALUE, "Spell description slot count must be a positive integer, not \"" +
 					slotspec + "\"");
 			}
 			catch (const std::invalid_argument & ia) {
+				(void)ia; // Suppress compiler warning
 				throw new Exception(ExceptionCode::INVALID_VALUE, "Spell description slot count must be either \"" + 
 					SpellDesc::COUNT_AT_WILL + "\" or a positive integer, not \"" + slotspec + "\"");
 			}
@@ -272,7 +275,7 @@ const string SpellLevelSummary::LEVEL_TAGNAME = "level";
 const string SpellLevelSummary::HEIGHTENING_TAGNAME = "height";
 const string SpellLevelSummary::SLOTS_TAGNAME = "slots";
 const string SpellLevelSummary::LEVEL_CANTRIP = "cantrip";
-const string SpellLevelSummary::LEVEL_CONTINU = "cantinuous";
+const string SpellLevelSummary::LEVEL_CONTINU = "continuous";
 const string SpellLevelSummary::COUNT_AT_WILL = "at will";
 const int SpellLevelSummary::ILEVEL_CANTRIP = 0;
 const int SpellLevelSummary::ILEVEL_CONTINU = -1;
@@ -280,7 +283,7 @@ const int SpellLevelSummary::IHEIGHT_NULL = -1;
 const int SpellLevelSummary::ICOUNT_AT_WILL = -1;
 const int SpellLevelSummary::ICOUNT_NULL = -1;
 
-SpellLevelSummary::SpellLevelSummary() {  }
+SpellLevelSummary::SpellLevelSummary() { slotcount = SpellLevelSummary::ICOUNT_NULL; heightening = SpellLevelSummary::IHEIGHT_NULL; level = SpellLevelSummary::ILEVEL_CANTRIP; }
 SpellLevelSummary::SpellLevelSummary(const xml::Element* source) { parse(source); }
 
 void SpellLevelSummary::parse(const xml::Element* source) {
@@ -301,9 +304,11 @@ void SpellLevelSummary::parse(const xml::Element* source) {
 			level = tmplevel;
 		}
 		catch (const std::out_of_range & oor) {
+			(void)oor; // Suppress compiler warning
 			throw new Exception(ExceptionCode::INVALID_VALUE, "Spell group level must be between 1 and 10 (inclusive), not " + levelspec);
 		}
 		catch (const std::invalid_argument& ia) {
+			(void)ia; // Suppress compiler warning
 			throw new Exception(ExceptionCode::INVALID_VALUE, "Spell group level \"" + levelspec + "\" is not a valid value. \
 Must be \"" + SpellLevelSummary::LEVEL_CANTRIP + "\", \"" + SpellLevelSummary::LEVEL_CONTINU + "\" or an integer between 1 and 10.");
 		}
@@ -318,9 +323,11 @@ Must be \"" + SpellLevelSummary::LEVEL_CANTRIP + "\", \"" + SpellLevelSummary::L
 			heightening = tmplevel;
 		}
 		catch (const std::out_of_range & oor) {
+			(void)oor; // Suppress compiler warning
 			throw new Exception(ExceptionCode::INVALID_VALUE, "Spell group height must be between 1 and 10 (inclusive), not " + levelspec);
 		}
 		catch (const std::invalid_argument & ia) {
+			(void)ia; // Suppress compiler warning
 			throw new Exception(ExceptionCode::INVALID_VALUE, "Spell group height \"" + levelspec + "\" is not a valid value. \
 Must be an integer between 1 and 10.");
 		}
@@ -339,9 +346,11 @@ Must be an integer between 1 and 10.");
 						+ countspec);
 			}
 			catch (const std::out_of_range& oor) {
+				(void)oor; // Suppress compiler warning
 				throw new Exception(ExceptionCode::INVALID_VALUE, "Spell group slot count outside range of integer: " + countspec);
 			}
 			catch (const std::invalid_argument & ia) {
+				(void)ia; // Suppress compiler warning
 				throw new Exception(ExceptionCode::INVALID_VALUE, "Spell group slot count \"" + countspec + "\" must be either \"" +
 					SpellLevelSummary::COUNT_AT_WILL + "\" or a positive integer");
 			}
@@ -366,7 +375,7 @@ const string SpellList::ATK_TAGNAME = "attack";
 const int SpellList::IATK_NULL = 0;
 
 SpellTradition SpellList::s2trad(const string& _stype) {
-	string stype;
+	string stype = _stype;
 	std::transform(_stype.begin(), _stype.end(), stype.begin(), std::tolower);
 	if (stype == "arcane") return SpellTradition::ARCANE;
 	else if (stype == "divine") return SpellTradition::DIVINE;
@@ -391,7 +400,7 @@ string SpellList::trad2s(const SpellTradition& trad) {
 }
 
 SpellCastingType SpellList::s2type(const string& _stype) {
-	string stype;
+	string stype = _stype;
 	std::transform(_stype.begin(), _stype.end(), stype.begin(), std::tolower);
 	if (stype == "prepared") return SpellCastingType::PREPARED;
 	else if (stype == "spontaneous") return SpellCastingType::SPONTANEOUS;
@@ -418,7 +427,7 @@ string SpellList::type2s(const SpellCastingType& sctype) {
 	}
 }
 
-SpellList::SpellList() {  }
+SpellList::SpellList() : difficulty(0), has_attack(false), tradition(SpellTradition::ARCANE), type(SpellCastingType::FOCUS) {  }
 SpellList::SpellList(const xml::Element* source) { parse(source); }
 
 void SpellList::parse(const xml::Element* source) {
@@ -441,9 +450,11 @@ void SpellList::parse(const xml::Element* source) {
 		difficulty = tmpdc;
 	}
 	catch (const std::out_of_range & oor) {
+		(void)oor; // Suppress compiler warning
 		throw new Exception(ExceptionCode::INVALID_VALUE, "Spell list DC must be a positive integer, not \"" + dcspec + "\"");
 	}
 	catch (const std::invalid_argument & ia) {
+		(void)ia; // Suppress compiler warning
 		throw new Exception(ExceptionCode::INVALID_VALUE, "Spell list DC must be a positive integer, not \"" + dcspec + "\"");
 	}
 

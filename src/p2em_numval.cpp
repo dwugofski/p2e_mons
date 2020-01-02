@@ -50,7 +50,7 @@ void NumVal::value(const double& newval) {
 
 bool NumVal::validate(const string& newval) const {
 	double converted = strtod(newval.c_str(), nullptr);
-	return (errno == ERANGE);
+	return (errno != ERANGE);
 }
 
 NumVal& NumVal::operator=(const NumVal& rhs) {

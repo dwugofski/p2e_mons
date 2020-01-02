@@ -68,7 +68,7 @@ Element* Element::first_element() const {
 Element* Element::first_element(const string& tagname) const {
 	vector<Element*> list = child_elements(tagname);
 	vector<Element*>::iterator it = list.begin();
-	Element* ret = *it;
+	Element* ret = (it == list.end()) ? nullptr : *it;
 	// Should no longer be necessary as all nodes are handled through the document
 	// it++; // I know, I know. But I think this is clearer
 	// for (; it != list.end(); it++) {
@@ -85,7 +85,7 @@ Element* Element::last_element() const {
 Element* Element::last_element(const string& tagname) const {
 	vector<Element*> list = child_elements(tagname);
 	vector<Element*>::reverse_iterator it = list.rbegin(); // Doing it this way to make it more flexible with other iterable list types
-	Element* ret = *it;
+	Element* ret = (it == list.rend()) ? nullptr : *it;
 	// Should no longer be necessary as all nodes are handled through the document
 	// it++; // I know, I know. But I think this is clearer
 	// for (; it != list.rend(); it++) {

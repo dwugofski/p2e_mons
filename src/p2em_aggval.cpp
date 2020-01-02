@@ -101,11 +101,13 @@ void AggVal::addItem(NumVal& newitem) {
 
 void AggVal::removeItem(NumVal& olditem) {
 	if (!hasItem(olditem)) return;
-	for (typename vector<NumVal*>::iterator it = _values.begin(); it != _values.end(); it++) {
+	vector<NumVal*>::iterator it = _values.begin();
+	while (it != _values.end()) {
 		if ((*it) == &olditem) {
-			_values.erase(it);
+			it = _values.erase(it);
 			break;
 		}
+		it++;
 	}
 	olditem.removeDependency(*this);
 	this->update();

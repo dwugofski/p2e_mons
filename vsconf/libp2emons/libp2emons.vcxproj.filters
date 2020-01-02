@@ -68,5 +68,8 @@
     <ClInclude Include="..\..\inc\p2em_core.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\p2em_macros.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,7 +4,7 @@
 
 using namespace p2em_core;
 
-const string Monster::TAGNAME = "p2mon";
+const string Monster::TAGNAME = "p2emon";
 const string Monster::NAME_TAGNAME = "name";
 const string Monster::LEVEL_TAGNAME = "level";
 const string Monster::RARITY_TAGNAME = "rarity";

@@ -8,14 +8,13 @@ Document::Document(xerc::DOMDocument* self) : Element(this, self->getDocumentEle
 }
 
 Document::~Document() {
-	umap<xerc::DOMNode*, Node*>::iterator it, ot;
-	it = _nodes.begin();
+	umap<xerc::DOMNode*, Node*>::iterator it = _nodes.begin();
 	while (it != _nodes.end()) {
-		ot = (it++);
-		delete (*ot).second;
-		_nodes.erase(ot);
+		if ((*it).second != this) delete (*it).second;
+		it = _nodes.erase(it);
 	}
 	_doc->release();
+	delete _doc;
 }
 
 void Document::track_node(Node* newnode) {
@@ -32,7 +31,7 @@ void Document::untrack_node(const Node* oldnode) {
 	while (it != _nodes.end()) {
 		ot = (it++);
 		if ((*ot).second == oldnode) {
-			_nodes.erase(ot);
+			it = _nodes.erase(ot);
 		}
 	}
 }

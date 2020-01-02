@@ -15,11 +15,13 @@ int main(int argc, char**argv) {
 			std::cout << "Could not find the monster element!\n";
 			throw new Exception(ExceptionCode::TEMPLATE_READ_ERROR);
 		}
+		std::cout << monel->name() << "\n";
 		Monster mon = Monster(core, monel);
 	}
 	catch (const std::exception e) {
 		std::cout << "\nError encountered!\n";
 		std::cout << e.what();
+		return -1;
 	}
 
 	return 0;

@@ -6,8 +6,8 @@ using namespace p2em_core;
 const char ModVal::VALUE_DELIMITER = ',';
 
 void ModVal::_link() {
-	_base.addDependency(*this);
-	_offset.addDependency(*this);
+	_base->addDependency(*this);
+	_offset->addDependency(*this);
 }
 
 vector<double> ModVal::_splitstring(const string& newval) const {
@@ -23,86 +23,88 @@ vector<double> ModVal::_splitstring(const string& newval) const {
 	return ret;
 }
 
-ModVal::ModVal() : OverrideableNumVal(), _base(*new NumVal(0)), _offset(*new NumVal(0)) {
+ModVal::ModVal() : OverrideableNumVal(), _base(new NumVal(0)), _offset(new NumVal(0)) {
 	_ownsbase = true;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(const string& name) : OverrideableNumVal(name), _base(*new NumVal(0)), _offset(*new NumVal(0)) {
+ModVal::ModVal(const string& name) : OverrideableNumVal(name), _base(new NumVal(0)), _offset(new NumVal(0)) {
 	_ownsbase = true;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(const double& value) : OverrideableNumVal(value), _base(*new NumVal(0)), _offset(*new NumVal(0)) {
+ModVal::ModVal(const double& value) : OverrideableNumVal(value), _base(new NumVal(0)), _offset(new NumVal(0)) {
 	_ownsbase = true;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(const string& name, const double& value) : OverrideableNumVal(name, value), _base(*new NumVal(0)), _offset(*new NumVal(0)) {
+ModVal::ModVal(const string& name, const double& value) : OverrideableNumVal(name, value), _base(new NumVal(0)), _offset(new NumVal(0)) {
 	_ownsbase = true;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(NumVal& base) : OverrideableNumVal(), _base(base), _offset(*new NumVal(0)) {
+ModVal::ModVal(NumVal& base) : OverrideableNumVal(), _base(&base), _offset(new NumVal(0)) {
 	_ownsbase = false;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(const string& name, NumVal& base) : OverrideableNumVal(name), _base(base), _offset(*new NumVal(0)) {
+ModVal::ModVal(const string& name, NumVal& base) : OverrideableNumVal(name), _base(&base), _offset(new NumVal(0)) {
 	_ownsbase = false;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(NumVal& base, const double& val) : OverrideableNumVal(val), _base(base), _offset(*new NumVal(0)) {
+ModVal::ModVal(NumVal& base, const double& val) : OverrideableNumVal(val), _base(&base), _offset(new NumVal(0)) {
 	_ownsbase = false;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(const string& name, NumVal& base, const double& val) : OverrideableNumVal(name, val), _base(base), _offset(*new NumVal(0)) {
+ModVal::ModVal(const string& name, NumVal& base, const double& val) : OverrideableNumVal(name, val), _base(&base), _offset(new NumVal(0)) {
 	_ownsbase = false;
 	_ownsoffset = true;
 	_link();
 }
 
-ModVal::ModVal(NumVal& base, NumVal& offset) : OverrideableNumVal(), _base(base), _offset(offset) {
+ModVal::ModVal(NumVal& base, NumVal& offset) : OverrideableNumVal(), _base(&base), _offset(&offset) {
 	_ownsbase = false;
 	_ownsoffset = false;
 	_link();
 }
 
-ModVal::ModVal(const string& name, NumVal& base, NumVal& offset) : OverrideableNumVal(name), _base(base), _offset(offset) {
+ModVal::ModVal(const string& name, NumVal& base, NumVal& offset) : OverrideableNumVal(name), _base(&base), _offset(&offset) {
 	_ownsbase = false;
 	_ownsoffset = false;
 	_link();
 }
 
-ModVal::ModVal(NumVal& base, NumVal& offset, const double& value) : OverrideableNumVal(value), _base(base), _offset(offset) {
+ModVal::ModVal(NumVal& base, NumVal& offset, const double& value) : OverrideableNumVal(value), _base(&base), _offset(&offset) {
 	_ownsbase = false;
 	_ownsoffset = false;
 	_link();
 }
 
-ModVal::ModVal(const string& name, NumVal& base, NumVal& offset, const double& value) : OverrideableNumVal(name, value), _base(base), _offset(offset) {
+ModVal::ModVal(const string& name, NumVal& base, NumVal& offset, const double& value) : OverrideableNumVal(name, value), _base(&base), _offset(&offset) {
 	_ownsbase = false;
 	_ownsoffset = false;
 	_link();
 }
 
-ModVal::ModVal(const ModVal& source) : OverrideableNumVal(source.name()), _base(source._base), _offset(source._offset) {
+ModVal::ModVal(const ModVal& source) : OverrideableNumVal(source.name()), _base(new NumVal(source.base())), _offset(new NumVal(source.offset())) {
+	_ownsbase = true;
+	_ownsoffset = true;
 	_link();
 }
 
 ModVal::~ModVal() {
 	// If we created these with new, we need to delete them
-	if (_ownsbase) delete& _base;
-	if (_ownsoffset) delete& _offset;
+	if (_ownsbase) delete _base;
+	if (_ownsoffset) delete _offset;
 }
 
 string ModVal::toString() const {
@@ -117,19 +119,19 @@ double ModVal::value() const {
 }
 
 double ModVal::base() const {
-	return _base.value();
+	return _base->value();
 }
 
 void ModVal::base(const double& newbase) {
-	if (_base != newbase) _base = newbase; // Should automatically call update()
+	if (*_base != newbase) *_base = newbase; // Should automatically call update()
 }
 
 double ModVal::offset() const {
-	return _offset.value();
+	return _offset->value();
 }
 
 void ModVal::offset(const double& newoffset) {
-	if(_offset != newoffset) _offset = newoffset; // Should automatically call update()
+	if(*_offset != newoffset) *_offset = newoffset; // Should automatically call update()
 }
 
 bool ModVal::validate(const string& newval) const {
@@ -158,8 +160,8 @@ ModVal& ModVal::operator=(const ModVal& rhs) {
 	// Then we pause ourselves so we don't update in response to base/offset update
 	// Then we unpause and manually update our base/offset
 	// Then we unpause ourselves and continue as normal
-	_base.pause();
-	_offset.pause();
+	_base->pause();
+	_offset->pause();
 
 	base(rhs.base());
 	offset(rhs.offset());
@@ -169,10 +171,10 @@ ModVal& ModVal::operator=(const ModVal& rhs) {
 	this->update();
 	this->pause();
 
-	_base.unpause();
-	_offset.unpause();
-	_base.update();
-	_offset.update();
+	_base->unpause();
+	_offset->unpause();
+	_base->update();
+	_offset->update();
 
 	this->unpause();
 	return *this;

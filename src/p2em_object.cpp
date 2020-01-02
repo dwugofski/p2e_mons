@@ -23,7 +23,7 @@ Traited::Traited(const Traited& source) {
 }
 
 bool Traited::hasTrait(const string& Ctrait) const {
-	string trait;
+	string trait = Ctrait;
 	std::transform(Ctrait.begin(), Ctrait.end(), trait.begin(), std::tolower);
 	for (vector<string>::const_iterator it = _traits.begin(); it != _traits.end(); it++)
 		if ((*it) == trait) return true;
@@ -31,17 +31,17 @@ bool Traited::hasTrait(const string& Ctrait) const {
 }
 
 void Traited::addTrait(const string& Ctrait) {
-	if (hasTrait(Ctrait)) return;
-	string trait;
+	string trait = Ctrait;
 	std::transform(Ctrait.begin(), Ctrait.end(), trait.begin(), std::tolower);
+	if (hasTrait(trait)) return;
 	_traits.push_back(trait);
 }
 
 void Traited::removeTrait(const string& Ctrait) {
-	if (!hasTrait(Ctrait)) return;
-	string trait;
-	vector<string>::const_iterator it;
+	string trait = Ctrait;
 	std::transform(Ctrait.begin(), Ctrait.end(), trait.begin(), std::tolower);
+	if (!hasTrait(trait)) return;
+	vector<string>::const_iterator it;
 	for (it = _traits.begin(); it != _traits.end(); it++) {
 		if (*it == trait) {
 			_traits.erase(it);

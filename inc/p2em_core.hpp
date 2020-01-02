@@ -15,6 +15,7 @@
 #include <tuple>
 
 #include "p2em_xml/p2em_xml.hpp"
+#include "p2em_macros.hpp"
 
 #define STRING_BUFFER_SIZE 256
 
@@ -319,8 +320,8 @@ namespace p2em_core {
 
 	class ModVal : public OverrideableNumVal {
 	protected:
-		NumVal& _base;
-		NumVal& _offset;
+		NumVal* _base;
+		NumVal* _offset;
 		bool _ownsbase;
 		bool _ownsoffset;
 
