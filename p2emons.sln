@@ -4,13 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libp2emons", "vsconf\libp2emons\libp2emons.vcxproj", "{37AB0C12-BB0C-47C7-AFA8-46B8FB233706}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBAE2118-0E13-4A6A-AEFD-9289FFAEDACF} = {CBAE2118-0E13-4A6A-AEFD-9289FFAEDACF}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p2em_ui", "vsconf\p2em_ui\p2em_ui.vcxproj", "{8E14B036-2404-42EF-AF8D-4E63747604FF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libp2emons_xml", "vsconf\libp2emons_xml\libp2emons_xml.vcxproj", "{CBAE2118-0E13-4A6A-AEFD-9289FFAEDACF}"
-	ProjectSection(ProjectDependencies) = postProject
-		{37AB0C12-BB0C-47C7-AFA8-46B8FB233706} = {37AB0C12-BB0C-47C7-AFA8-46B8FB233706}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

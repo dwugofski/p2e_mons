@@ -3,6 +3,12 @@
 #ifndef __P2EM_XML_HPP__
 #define __P2EM_XML_HPP__
 
+#ifdef P2EM_XML_EXPORTS
+#define P2EM_XML_API __declspec(dllexport)
+#else
+#define P2EM_XML_API __declspec(dllimport)
+#endif
+
 #include "xercesc/util/PlatformUtils.hpp"
 #include "xercesc/dom/DOM.hpp"
 #include "xercesc/parsers/XercesDOMParser.hpp"
@@ -30,9 +36,9 @@ namespace p2em_xml {
 	class Document;
 
 	// template<typename T_ret_t> // Consider making this more generic...
-	vector<string> node2strvec(const Element* srcnode, const string& tagname);
+	P2EM_XML_API vector<string> node2strvec(const Element* srcnode, const string& tagname);
 
-	class Exception {
+	class P2EM_XML_API Exception {
 	public:
 		enum class Code {
 			FILE_ACCEES_ERROR, // Cannot find / open a file
@@ -54,10 +60,10 @@ namespace p2em_xml {
 		string message() const;
 		Code code() const;
 	};
-	string ecode2str(const Exception::Code& code);
-	std::ostream& operator<<(std::ostream& out, const Exception& ex);
+	P2EM_XML_API string ecode2str(const Exception::Code& code);
+	P2EM_XML_API std::ostream& operator<<(std::ostream& out, const Exception& ex);
 
-	class ErrorHandler : public xerc::ErrorHandler {
+	class P2EM_XML_API ErrorHandler : public xerc::ErrorHandler {
 	public:
 		enum class Mode {
 			CHECK_SCHEMA,
@@ -99,7 +105,7 @@ namespace p2em_xml {
 		void out(std::ostream& newout);
 	};
 
-	class Parser {
+	class P2EM_XML_API Parser {
 	private:
 		xerc::XercesDOMParser _parser;
 		ErrorHandler hdl;
@@ -110,11 +116,11 @@ namespace p2em_xml {
 		// ~Parser();
 
 		Document* parse(const string& filename);
-		Document* parse(const string& filename, const string& schemafile);
-		bool validate(const string& filename, const string& schemafile);
+		Document* parse(const string& filename, const string& schemaloc);
+		bool validate(const string& filename, const string& schemaloc);
 	};
 
-	class Node {
+	class P2EM_XML_API Node {
 	public:
 		enum class Type {
 			ELEMENT,
@@ -167,12 +173,12 @@ namespace p2em_xml {
 	};
 
 	// Comparison and translation for node types
-	bool operator==(const Node::Type& lhs, const xerc::DOMNode::NodeType& rhs);
-	bool operator==(const xerc::DOMNode::NodeType& lhs, const Node::Type& rhs);
-	Node::Type xerc2t(const xerc::DOMNode::NodeType& from);
-	xerc::DOMNode::NodeType t2xerc(const Node::Type& from);
+	P2EM_XML_API bool operator==(const Node::Type& lhs, const xerc::DOMNode::NodeType& rhs);
+	P2EM_XML_API bool operator==(const xerc::DOMNode::NodeType& lhs, const Node::Type& rhs);
+	P2EM_XML_API Node::Type xerc2t(const xerc::DOMNode::NodeType& from);
+	P2EM_XML_API xerc::DOMNode::NodeType t2xerc(const Node::Type& from);
 
-	class Attribute : public Node {
+	class P2EM_XML_API Attribute : public Node {
 	private:
 		xerc::DOMAttr* _attr;
 
@@ -190,7 +196,7 @@ namespace p2em_xml {
 		vector<Attribute*> sibling_attrs() const;
 	};
 
-	class Element : public Node {
+	class P2EM_XML_API Element : public Node {
 	private:
 		xerc::DOMElement* _el;
 
@@ -234,7 +240,7 @@ namespace p2em_xml {
 
 	};
 
-	class Document : public Element {
+	class P2EM_XML_API Document : public Element {
 	private:
 		xerc::DOMDocument* _doc;
 		umap<xerc::DOMNode*, Node*> _nodes;

@@ -112,10 +112,10 @@ string ErrorHandler::_message(const xerc::SAXParseException& err, const string& 
 
 	ret += tstr + " : ";
 	ret += _prelude + " : (";
-	snprintf(&buffer[0], 80, "%d", err.getLineNumber());
+	snprintf(&buffer[0], 80, "%I64d", err.getLineNumber());
 	ret += buffer;
 	ret += ", ";
-	snprintf(&buffer[0], 80, "%d", err.getColumnNumber());
+	snprintf(&buffer[0], 80, "%I64d", err.getColumnNumber());
 	ret += ")\t";
 	ret += level + "\n" + msg + "\n";
 	xerc::XMLString::release(&msg);

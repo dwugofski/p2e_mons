@@ -89,6 +89,15 @@ namespace p2em_core {
 		UNALIGNED
 	};
 
+	enum class CreatureSize {
+		TINY,
+		SMALL,
+		MEDIUM,
+		LARGE,
+		HUGE,
+		GARGANTUAN
+	};
+
 	enum class ActionCount {
 		FREE,
 		SINGLE,
@@ -161,6 +170,7 @@ namespace p2em_core {
 		Monster* operator[](uint id);
 
 		static ActionCount actionCount(const string& source);
+		static CreatureSize creatureSize(const string& source);
 	};
 
 	// Located in p2em_core.cpp
@@ -174,6 +184,21 @@ namespace p2em_core {
 
 		ExceptionCode code() const;
 		string msg() const;
+	};
+
+	class Traited {
+	protected:
+		vector<string> _traits;
+	public:
+		Traited();
+		Traited(const vector<string>& startings);
+		Traited(const Traited& source);
+
+		bool hasTrait(const string& tagnam) const;
+		void addTrait(const string& newtag);
+		void removeTrait(const string& oldtag);
+
+		void parse(const xml::Element* source);
 	};
 
 	class Updateable {
@@ -554,21 +579,6 @@ namespace p2em_core {
 		void parse(const xml::Element* source);
 	};
 
-	class Traited {
-	protected:
-		vector<string> _traits;
-	public:
-		Traited();
-		Traited(const vector<string>& startings);
-		Traited(const Traited& source);
-
-		bool hasTrait(const string& tagnam) const;
-		void addTrait(const string& newtag);
-		void removeTrait(const string& oldtag);
-
-		void parse(const xml::Element* source);
-	};
-
 	// Located in p2em_core.cpp
 	class Feat : public Traited {
 	public:
@@ -781,8 +791,7 @@ namespace p2em_core {
 		virtual string name() const;
 		virtual void name(const string& newname);
 
-		virtual const Registry& reg() const = 0;
-		virtual Registry& reg() = 0;
+		virtual Registry& reg() const = 0;
 
 		virtual const Attribute& operator[](const string& attrname) const;
 		virtual Attribute& operator[](const string& attrname);
@@ -810,6 +819,7 @@ namespace p2em_core {
 		static const string ALIGNMENT_TAGNAME;
 		static const string SIZE_TAGNAME;
 		static const string TYPES_TAGNAME;
+		static const string TYPES_TYPE_TAGNAME;
 		static const string PERCEPTION_TAGNAME;
 		static const string LANGUAGES_TAGNAME;
 		static const string LANGUAGES_LANG_TAGNAME;
@@ -839,12 +849,18 @@ namespace p2em_core {
 		static const string RESISTANCES_TAGNAME;
 		static const string RESISTANCES_RES_TAGNAME;
 		static const string OFFTURN_TAGNAME;
+		static const string ONTURN_TAGNAME;
 		static const string SPEEDS_TAGNAME;
 		static const string SPEEDS_UNIT_TAGNAME;
 		static const string SPEEDS_SPEED_TAGNAME;
+		static const string ACTIONS_TAGNAME;
+		static const string SPELLS_TAGNAME;
 
 		NumVal level;
+		string rarity;
 		AlignmentAttr alignment;
+		CreatureSize size;
+		vector<string> types;
 		CondMod perception;
 		vector<string> languages;
 		vector<CondMod> skills;

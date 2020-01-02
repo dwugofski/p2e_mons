@@ -208,6 +208,7 @@
 				<type>ritual</type>
 				<difficulty>37</difficulty>
 				<group>
+					<level>continuous</level>
 					<spell><name>planar ally</name></spell>
 				</group>
 			</spelllist>
@@ -216,6 +217,7 @@
 				<type>focus</type>
 				<difficulty>37</difficulty>
 				<group>
+					<level>continuous</level>
 					<spell><name>planar ally</name></spell>
 				</group>
 			</spelllist>

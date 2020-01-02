@@ -7,6 +7,10 @@
 
 using namespace p2em_core;
 
+// --------------------------------------------------
+// Exception Class ----------------------------------
+// --------------------------------------------------
+
 Exception::Exception(ExceptionCode excode, const string& msg) {
 	_code = excode;
 	_msg = msg;
@@ -16,6 +20,10 @@ Exception::Exception(ExceptionCode excode) : Exception::Exception(excode, P2EMon
 
 ExceptionCode Exception::code() const { return _code; }
 string Exception::msg() const { return _msg; }
+
+// --------------------------------------------------
+// Core Class ---------------------------------------
+// --------------------------------------------------
 
 Core::Core() {
 	umap<uint, Monster*> _monsters = { {Object::NULL_ID, nullptr} };
@@ -115,6 +123,18 @@ ActionCount Core::actionCount(const string& source) {
 	else throw new Exception(ExceptionCode::INVALID_VALUE, "Cannot parse '" + source + "' into an ActionCount!");
 }
 
+CreatureSize Core::creatureSize(const string& source) {
+	string lower;
+	std::transform(source.begin(), source.end(), lower.begin(), std::tolower);
+	if (lower == "tiny") return CreatureSize::TINY;
+	else if (lower == "small") return CreatureSize::SMALL;
+	else if (lower == "medium") return CreatureSize::MEDIUM;
+	else if (lower == "large") return CreatureSize::LARGE;
+	else if (lower == "huge") return CreatureSize::HUGE;
+	else if (lower == "gargantuan") return CreatureSize::GARGANTUAN;
+	else throw new Exception(ExceptionCode::INVALID_VALUE, "Cannot parse \"" + source + "\" into a CreatureSize!");
+}
+
 // --------------------------------------------------
 // Feat Class ---------------------------------------
 // --------------------------------------------------
@@ -160,12 +180,14 @@ void DamageSpec::parse(const xml::Element* source) {
 // --------------------------------------------------
 
 const string Action::TAGNAME = "action";
+const string Action::ACTION_TYPE_TAGNAME = "type";
 const string Action::ACTION_COUNT_TAGNAME = "count";
 const string Action::ACTION_NAME_TAGNAME = "name";
+const string Action::ACTION_MODIFIER_TAGNAME = "modifier";
 const string Action::ACTION_RESULTS_TAGNAME = "results";
 const string Action::ACTION_RESULTS_EFFECT_TAGNAME = "effect";
 
-Action::Action() : Traited() {  }
+Action::Action() : Traited() { modifier = 0; action_count = ActionCount::PASSIVE; }
 Action::Action(const xml::Element* source) { parse(source); }
 
 void Action::parse(const xml::Element* source) {

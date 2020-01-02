@@ -23,7 +23,7 @@ void Document::track_node(Node* newnode) {
 	for (umap<xerc::DOMNode*, Node*>::iterator it = _nodes.begin(); it != _nodes.end(); it++) {
 		if ((*it).second == newnode) return;
 	}
-	_nodes.insert({ newnode->xercnode, newnode });
+	_nodes.insert({ newnode->xercnode(), newnode });
 }
 
 void Document::untrack_node(const Node* oldnode) {
